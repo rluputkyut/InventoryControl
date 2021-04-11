@@ -1,0 +1,118 @@
+﻿@page "/Product/index"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Product Listing</h3>
+
+
+@if (products == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="OnAddNew">Create New Product</button>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Code</th>
+                <th>Name</th>
+                <th>BrandName</th>
+                <th>ProductTypeName</th>
+                <th>Price</th>
+                <th>ExpiredDate</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var info in products)
+            {
+                <tr>
+                    @if (string.IsNullOrEmpty(info.Photo))
+                    {
+                        <td></td>
+                    }
+                    else
+                    {
+                        <td><img class="rounded m-0" src="@string.Format($"data:png;base64,{info.Photo}")" /></td>
+                    }
+                    <td>@info.Code</td>
+                    <td>@info.Name</td>
+                    <td>@info.BrandName</td>
+                    <td>@info.ProductTypeName</td>
+                    <td>@String.Format("{0:0.00} MMK", info.Price)</td>
+                    <td>@info.ExpiredDate</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+
+    private List<ProductInfo> products;
+    public bool Show { get; set; } = false;
+    int _tempId = 0;
+
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/Product/Add");
+    }
+
+    void OnEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/Product/Edit/{id}");
+    }
+
+    async void OnDelete(ProductInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the product '{info.Name}'?"))
+            return;
+
+        Show = false;
+        var result = await Http.DeleteAsync("api/product/delete/" + info.Id);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        products = await Http.GetFromJsonAsync<List<ProductInfo>>("api/product/get");
+
+        StateHasChanged();
+    }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    products = await Http.GetFromJsonAsync<List<ProductInfo>>("api/product/get");
+    //}
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

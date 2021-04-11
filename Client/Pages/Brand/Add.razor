@@ -1,0 +1,77 @@
+﻿@page "/Brand/Add"
+@page "/Brand/Edit/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Brand Entry</h3>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (brand == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="brand" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+        <DataAnnotationsValidator/>
+
+        <div class="col-12 row mt-2">
+            <label for="Code" class="col-md-2 col-form-label">Code:</label>
+            <div >
+                <InputText id="Code" class="form-control" @bind-Value="brand.Code" />
+                <ValidationMessage For="@(()=> brand.Code)"/>
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="Name" class="col-md-2 col-form-label">Name:</label>
+            <div>
+                <InputText id="Name" class="form-control" @bind-Value="brand.Name" />
+                <ValidationMessage For="@(()=> brand.Name)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <button type="submit" class="btn btn-success">Save</button>
+                <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
+            </div>
+        </div>
+    </EditForm>
+}
+<br />
+
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private BrandInfo brand;
+
+    protected override async Task OnInitializedAsync()
+    {
+        brand = new BrandInfo();
+
+        if (id > 0)
+        {
+            brand = await Http.GetFromJsonAsync<BrandInfo>($"api/brand/getbyid/{id}");
+        }
+    }
+
+    void Back()
+    {
+        NavigationManager.NavigateTo("/Brand/Index");
+    }
+
+    private async Task Create()
+    {
+
+        if (brand.Id == 0)
+            await Http.PostAsJsonAsync<BrandInfo>("api/brand/save", brand);
+        else
+            await Http.PutAsJsonAsync<BrandInfo>("api/brand/update", brand);
+
+        NavigationManager.NavigateTo("/Brand/Index");
+    }
+}

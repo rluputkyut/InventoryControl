@@ -1,0 +1,231 @@
+﻿@page "/TransferProduct/Add"
+@page "/TransferProduct/Edit/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Transfer Product Entry</h3>
+
+@if (transferProductHeader == null || transferProductHeader.Items == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="transferProductHeader" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+        <DataAnnotationsValidator />
+
+        <div class="col-12 row mt-2">
+            <label for="Code" class="col-md-2 col-form-label">Code:</label>
+            <div>
+                <InputText id="Code" class="form-control" @bind-Value="transferProductHeader.Code" />
+                <ValidationMessage For="@(()=> transferProductHeader.Code)" />
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="FromWarehouseId" class="col-md-2 col-form-label">From Warehouse:</label>
+            <div>
+                <Select id="FromWarehouseId" class="form-control" @onchange="FromWarehouseSelectionChanged">
+                    @if (warehouses != null)
+                    {
+                        @foreach (var warehouse in warehouses)
+                        {
+                            var _selected = warehouse.Id == transferProductHeader.FromWarehouseId;
+                            <option value="@warehouse.Id" selected="@_selected">@warehouse.Name</option>
+                        }
+                    }
+                </Select>
+                <ValidationMessage For="@(()=> transferProductHeader.FromWarehouseId)" />
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="ToWarehouseId" class="col-md-2 col-form-label">To Warehouse:</label>
+            <div>
+                <Select id="ToWarehouseId" class="form-control" @onchange="ToWarehouseSelectionChanged">
+                    @if (warehouses != null)
+                    {
+                        @foreach (var warehouse in warehouses)
+                        {
+                            var _selected = warehouse.Id == transferProductHeader.ToWarehouseId;
+                            <option value="@warehouse.Id" selected="@_selected">@warehouse.Name</option>
+                        }
+                    }
+                </Select>
+                <ValidationMessage For="@(()=> transferProductHeader.ToWarehouseId)" />
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="Cost" class="col-md-2 col-form-label">Cost:</label>
+            <div>
+                <InputNumber id="Cost" class="form-control" @bind-Value="transferProductHeader.Cost" />
+                <ValidationMessage For="@(()=> transferProductHeader.Cost)" />
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="Remark" class="col-md-2 col-form-label">Remark:</label>
+            <div>
+                <InputTextArea id="Remark" class="form-control" @bind-Value="transferProductHeader.Remark" />
+                <ValidationMessage For="@(()=> transferProductHeader.Remark)" />
+            </div>
+        </div>
+        <div class="row col-md-12 mt-2">
+            <label class="col-md-2">Product:</label>
+            <div class="col-md-2">
+                <InputSelect id="ProductId" class="form-control" @bind-Value="transferProductItem.ProductId">
+                    @if (products != null)
+                        {
+                        @foreach (var product in products)
+                            {
+                            <option value="@product.Id">@product.ProductName</option>
+                            }
+                        }
+                </InputSelect>
+            </div>
+            <label class="col-md-2">Quantity:</label>
+            <div class="col-md-2">
+                <InputNumber id="Quantity" class="form-control" @bind-Value="transferProductItem.Quantity" />
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary" @onclick="@AddItem">Add</button>
+                <button type="button" class="btn btn-secondary" @onclick="@Cancel">Cancel</button>
+            </div>
+        </div>
+        <br />
+        <div class="col-md-12 mt-2">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ProductName</th>
+                        <th>Quantity</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var info in transferProductHeader.Items)
+                    {
+                        <tr>
+                            <td>@info.ProductName</td>
+                            <td>@info.Quantity</td>
+                            <td>
+                                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEditItem(info.Id))">Edit</a> |
+                                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDeleteItem(info.Id))">Delete</a> |
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <button type="submit" class="btn btn-success">Save</button>
+                <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private TransferProductHeaderInfo transferProductHeader;
+    private TransferProductItemInfo transferProductItem;
+
+    private List<WarehouseInfo> warehouses;
+    private List<WarehouseProductInfo> products;
+    private string _imageData = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>($"api/warehouse/get");
+        transferProductItem = new TransferProductItemInfo();
+        transferProductHeader = new TransferProductHeaderInfo();
+
+        if (id > 0)
+        {
+            transferProductHeader = await Http.GetFromJsonAsync<TransferProductHeaderInfo>($"api/transferproduct/getheaderbyid/{id}");
+            transferProductHeader.Items = await Http.GetFromJsonAsync<List<TransferProductItemInfo>>($"api/transferproduct/getitemsbyid/{id}");
+        }
+        else
+        {
+            transferProductHeader.Items = new List<TransferProductItemInfo>();
+        }
+    }
+
+    private async Task Create()
+    {
+        if (transferProductHeader.FromWarehouseId == transferProductHeader.ToWarehouseId)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"From-Warehouse should not be same with To-Warehouse!");
+            return;
+        }
+        else if (transferProductHeader.Id == 0)
+            await Http.PostAsJsonAsync<TransferProductHeaderInfo>("api/transferproduct/save", transferProductHeader);
+        else
+            await Http.PutAsJsonAsync<TransferProductHeaderInfo>("api/transferproduct/update", transferProductHeader);
+
+        NavigationManager.NavigateTo("/TransferProduct/Index");
+    }
+
+
+    async void FromWarehouseSelectionChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            var _newId = Convert.ToInt32(e.Value.ToString());
+            transferProductHeader.FromWarehouseId = _newId;
+            products = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{transferProductHeader.FromWarehouseId}");
+            StateHasChanged();
+        }
+    }
+
+    void ToWarehouseSelectionChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            var _newId = Convert.ToInt32(e.Value.ToString());
+
+            //if (transferProductHeader.FromWarehouseId == _newId)
+            //{
+            //    await JSRuntime.InvokeVoidAsync("alert", $"To-Warehouse should not be same From-Warehouse!");
+            //    transferProductHeader.FromWarehouseId = 0;
+            //    //warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>($"api/warehouse/get");
+            //    StateHasChanged();
+            //}
+
+            transferProductHeader.ToWarehouseId = _newId;
+        }
+    }
+
+    void Back()
+    {
+        NavigationManager.NavigateTo("/TransferProduct/Index");
+    }
+
+    void AddItem()
+    {
+        transferProductItem.HeaderId = id;
+        transferProductItem.ProductName = products.Where(x => x.Id == transferProductItem.ProductId).Select(x => x.ProductName).FirstOrDefault();
+        transferProductHeader.Items.Add(transferProductItem);
+        transferProductItem = new TransferProductItemInfo();
+    }
+
+    void Cancel()
+    {
+        transferProductItem = new TransferProductItemInfo();
+    }
+
+    void OnEditItem(int id)
+    {
+        transferProductItem = transferProductHeader.Items.Where(x => x.Id == id).FirstOrDefault();
+    }
+
+    void OnDeleteItem(int id)
+    {
+        var _item = transferProductHeader.Items.Where(x => x.Id == id).FirstOrDefault();
+        transferProductHeader.Items.Remove(_item);
+    }
+}

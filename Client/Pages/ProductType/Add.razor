@@ -1,0 +1,77 @@
+﻿@page "/ProductType/Add"
+@page "/ProductType/Edit/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Product Type Entry</h3>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (productType == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="productType" OnValidSubmit="Create" class="card card-body bg-light mt-5">
+        <DataAnnotationsValidator />
+
+        <div class="col-12 row mt-2">
+            <label for="Code" class="col-md-2 col-form-label">Code:</label>
+            <div>
+                <InputText id="Code" class="form-control" @bind-Value="productType.Code" />
+                <ValidationMessage For="@(()=> productType.Code)" />
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="Name" class="col-md-2 col-form-label">Name:</label>
+            <div>
+                <InputText id="Name" class="form-control" @bind-Value="productType.Name" />
+                <ValidationMessage For="@(()=> productType.Name)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <button type="submit" class="btn btn-success">Save</button>
+                <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
+            </div>
+        </div>
+    </EditForm>
+}
+<br />
+
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private ProductTypeInfo productType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        productType = new ProductTypeInfo();
+
+        if (id > 0)
+        {
+            productType = await Http.GetFromJsonAsync<ProductTypeInfo>($"api/producttype/getbyid/{id}");
+        }
+    }
+
+    private async Task Create()
+    {
+
+        if (productType.Id == 0)
+            await Http.PostAsJsonAsync<ProductTypeInfo>("api/producttype/save", productType);
+        else
+            await Http.PutAsJsonAsync<ProductTypeInfo>("api/producttype/update", productType);
+
+        NavigationManager.NavigateTo("/producttype/Index");
+    }
+
+    void Back()
+    {
+        NavigationManager.NavigateTo("/producttype/Index");
+    }
+}

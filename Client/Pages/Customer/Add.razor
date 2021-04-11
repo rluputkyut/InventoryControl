@@ -1,0 +1,97 @@
+﻿@page "/Customer/Add"
+@page "/Customer/Edit/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Customer Entry</h3>
+
+
+@if (customer == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<EditForm Model="customer" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+    <DataAnnotationsValidator />
+
+    <div class="col-12 row mt-2">
+        <label for="Name" class="col-md-2 col-form-label">Name:</label>
+        <div>
+            <InputText id="Name" class="form-control" @bind-Value="customer.Name" />
+            <ValidationMessage For="@(()=> customer.Name)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="NickName" class="col-md-2 col-form-label">Nick Name:</label>
+        <div>
+            <InputText id="NickName" class="form-control" @bind-Value="customer.NickName" />
+            <ValidationMessage For="@(()=> customer.NickName)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="PhoneNo" class="col-md-2 col-form-label">Phone No:</label>
+        <div>
+            <InputText id="PhoneNo" class="form-control" @bind-Value="customer.PhoneNo" />
+            <ValidationMessage For="@(()=> customer.PhoneNo)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Address" class="col-md-2 col-form-label">Address:</label>
+        <div>
+            <InputText id="Address" class="form-control" @bind-Value="customer.Address" />
+            <ValidationMessage For="@(()=> customer.Address)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="AccountInformation" class="col-md-2 col-form-label">Account Info:</label>
+        <div>
+            <InputText id="AccountInformation" class="form-control" @bind-Value="customer.AccountInformation" />
+            <ValidationMessage For="@(()=> customer.AccountInformation)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
+        </div>
+    </div>
+</EditForm>
+}
+<br />
+
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private CustomerInfo customer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customer = new CustomerInfo();
+
+        if (id > 0)
+        {
+            customer = await Http.GetFromJsonAsync<CustomerInfo>($"api/customer/getbyid/{id}");
+        }
+    }
+
+    private async Task Create()
+    {
+
+        if (customer.Id == 0)
+            await Http.PostAsJsonAsync<CustomerInfo>("api/customer/save", customer);
+        else
+            await Http.PutAsJsonAsync<CustomerInfo>("api/customer/update", customer);
+
+        NavigationManager.NavigateTo("/customer/Index");
+    }
+
+    void Back()
+    {
+        NavigationManager.NavigateTo("/customer/Index");
+    }
+}

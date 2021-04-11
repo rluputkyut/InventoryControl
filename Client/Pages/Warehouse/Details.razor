@@ -1,0 +1,165 @@
+﻿@page "/Warehouse/Details/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Warehouse Details</h3>
+
+
+@if (warehouse == null || wProducts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="warehouse" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+        <DataAnnotationsValidator />
+
+        <div class="col-12 row mt-2">
+            <label for="Code" class="col-md-2 col-form-label">Code:</label>
+            <div>
+                <label class="form-control">@warehouse.Code</label>
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="Name" class="col-md-2 col-form-label">Name:</label>
+            <div>
+                <label class="form-control">@warehouse.Name</label>
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="ProductId" class="col-md-2 col-form-label">Product:</label>
+            <div>
+                <InputSelect id="ProductId" class="form-control" @bind-Value="wProduct.ProductId">
+                    @if (products != null)
+                        {
+                        @foreach (var info in products)
+                            {
+                            <option value="@info.Id">@info.Name</option>
+                            }
+                        }
+                </InputSelect>
+                <ValidationMessage For="@(()=> wProduct.ProductId)" />
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <label for="Size" class="col-md-2 col-form-label">Quantity:</label>
+            <div>
+                <InputNumber id="Size" class="form-control" @bind-Value="wProduct.Quantity" />
+                <ValidationMessage For="@(()=> wProduct.Quantity)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <button type="submit" class="btn btn-primary">@_btnName</button>
+                <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+            </div>
+        </div>
+    </EditForm>
+
+    <div class="row">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var info in wProducts)
+                {
+                    <tr>
+                        <td>@info.ProductCode</td>
+                        <td>@info.ProductName</td>
+                        <td>@info.Quantity</td>
+                        <td>
+                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+<br />
+
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private WarehouseInfo warehouse;
+    private List<ProductInfo> products;
+    private WarehouseProductInfo wProduct;
+    private List<WarehouseProductInfo> wProducts;
+    public bool Show { get; set; } = false;
+    string _btnName = string.Empty;
+    int _tempId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _btnName = "Save";
+        wProduct = new WarehouseProductInfo();
+        wProduct.WarehouseId = id;
+        warehouse = new WarehouseInfo();
+        products = await Http.GetFromJsonAsync<List<ProductInfo>>($"api/product/get");
+
+        if (id > 0)
+        {
+            warehouse = await Http.GetFromJsonAsync<WarehouseInfo>($"api/warehouse/getbyid/{id}");
+            wProducts = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{id}");
+        }
+    }
+
+    void OnCancel()
+    {
+        _btnName = "Save";
+        wProduct = new WarehouseProductInfo();
+        wProduct.WarehouseId = id;
+    }
+
+    void OnEdit(int id)
+    {
+        wProduct = wProducts.Where(x => x.Id == id).FirstOrDefault();
+        _btnName = "Update";
+    }
+
+    async void OnDelete(WarehouseProductInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the product '{info.ProductName}'?"))
+            return;
+
+        Show = false;
+        var result = await Http.DeleteAsync("api/warehouseproducts/delete/" + info.Id);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        wProducts = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{id}");
+        OnCancel();
+
+        StateHasChanged();
+    }
+
+    private async Task Create()
+    {
+
+        if (wProduct.Id == 0)
+            await Http.PostAsJsonAsync<WarehouseProductInfo>("api/warehouseproducts/save", wProduct);
+        else
+            await Http.PutAsJsonAsync<WarehouseProductInfo>("api/warehouseproducts/update", wProduct);
+
+        //NavigationManager.NavigateTo("/Warehouse/Index");
+        await LoadForm();
+    }
+}

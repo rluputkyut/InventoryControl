@@ -1,0 +1,126 @@
+﻿@page "/PurchaseOrder/Details/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Purchase Order Details</h3>
+
+@if (headerOrder == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                Code:
+            </dt>
+
+            <dd>
+                @headerOrder.Code
+            </dd>
+
+            <dt>
+                Purchase Date:
+            </dt>
+
+            <dd>
+                @headerOrder.PurchaseDate
+            </dd>
+
+            <dt>
+                Source:
+            </dt>
+
+            <dd>
+                @headerOrder.Source
+            </dd>
+
+            <dt>
+                Warehouse:
+            </dt>
+
+            <dd>
+                @headerOrder.WarehouseName
+            </dd>
+
+            <dt>
+                Remark:
+            </dt>
+
+            <dd>
+                @headerOrder.Remark
+            </dd>
+        </dl>
+
+        <table class="table">
+            <tr>
+                <th>
+                    Product
+                </th>
+                <th>
+                    Quantity
+                </th>
+                <th>
+                    Buying Price
+                </th>
+                <th>
+                    Currency
+                </th>
+            </tr>
+
+            @foreach (var item in headerOrder.Items)
+            {
+        <tr>
+            <td>
+                @item.ProductName
+            </td>
+            <td>
+                @item.Quantity
+            </td>
+            <td>
+                @String.Format("{0:0.00}", item.BuyingPrice)
+            </td>
+            <td>
+                @item.Currency
+            </td>
+        </tr>
+            }
+
+        </table>
+
+    </div>
+
+}
+<p>
+    <button type="button" class="btn btn-secondary" @onclick="@OnBack">Back</button>
+</p>
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private PurchaseOrderHeaderInfo headerOrder;
+
+    protected override async Task OnInitializedAsync()
+    {
+        headerOrder = new PurchaseOrderHeaderInfo();
+        headerOrder.Items = new List<PurchaseOrderItemInfo>();
+
+        if (id > 0)
+        {
+            headerOrder = await Http.GetFromJsonAsync<PurchaseOrderHeaderInfo>($"api/purchaseorder/getheaderbyid/{id}");
+            headerOrder.Items = await Http.GetFromJsonAsync<List<PurchaseOrderItemInfo>>($"api/purchaseorder/getitemsbyid/{id}");
+        }
+
+    }
+
+    void OnBack()
+    {
+        NavigationManager.NavigateTo("/PurchaseOrder/Index");
+    }
+
+}

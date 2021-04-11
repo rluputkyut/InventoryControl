@@ -1,0 +1,107 @@
+﻿@page "/Warehouse/index"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Warehouse Listing</h3>
+
+
+@if (warehouses == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="OnAddNew">Create New Brand</button>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var info in warehouses)
+            {
+                <tr>
+                    <td>@info.Code</td>
+                    <td>@info.Name</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+
+    private List<WarehouseInfo> warehouses;
+    public bool Show { get; set; } = false;
+    int _tempId = 0;
+
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/Warehouse/Add");
+    }
+
+    void OnEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/Warehouse/Edit/{id}");
+    }
+
+    void OnDetails(int id)
+    {
+        NavigationManager.NavigateTo($"/Warehouse/Details/{id}");
+    }
+
+    async void OnDelete(WarehouseInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the warehouse '{info.Name}'?"))
+            return;
+
+        Show = false;
+        var result = await Http.DeleteAsync("api/warehouse/delete/" + _tempId);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>("api/warehouse/get");
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>("api/warehouse/get");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

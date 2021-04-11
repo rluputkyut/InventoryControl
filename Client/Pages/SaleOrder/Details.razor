@@ -1,0 +1,134 @@
+﻿@page "/SaleOrder/Details/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Sale Order Details</h3>
+
+@if (headerOrder == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                Code:
+            </dt>
+
+            <dd>
+                @headerOrder.Code
+            </dd>
+
+            <dt>
+                Selling Date:
+            </dt>
+
+            <dd>
+                @headerOrder.SellingDate
+            </dd>
+
+            <dt>
+                Customer:
+            </dt>
+
+            <dd>
+                @headerOrder.CustomerName
+            </dd>
+
+            <dt>
+                Warehouse:
+            </dt>
+
+            <dd>
+                @headerOrder.WarehouseName
+            </dd>
+
+            <dt>
+                Payment Type:
+            </dt>
+
+            <dd>
+                @(headerOrder.IsCOD? "Cash On Delivery" : $"Transfer Account Info:{headerOrder.TransferInfo}" )
+            </dd>
+
+            <dt>
+                Remark:
+            </dt>
+
+            <dd>
+                @headerOrder.Remark
+            </dd>
+        </dl>
+
+        <table class="table">
+            <tr>
+                <th>
+                    Product
+                </th>
+                <th>
+                    Quantity
+                </th>
+                <th>
+                    Selling Price
+                </th>
+                <th>
+                    Other Expense
+                </th>
+            </tr>
+
+            @foreach (var item in headerOrder.Items)
+            {
+                <tr>
+                    <td>
+                        @item.ProductName
+                    </td>
+                    <td>
+                        @item.Quantity
+                    </td>
+                    <td>
+                        @String.Format("{0:0.00}", item.SellingPrice)
+                    </td>
+                    <td>
+                        @String.Format("{0:0.00}", item.OtherExpense)
+                    </td>
+                </tr>
+            }
+
+        </table>
+
+    </div>
+
+}
+<p>
+    <button type="button" class="btn btn-secondary" @onclick="@OnBack">Back</button>
+</p>
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private SaleOrderHeaderInfo headerOrder;
+
+    protected override async Task OnInitializedAsync()
+    {
+        headerOrder = new SaleOrderHeaderInfo();
+        headerOrder.Items = new List<SaleOrderItemInfo>();
+
+        if (id > 0)
+        {
+            headerOrder = await Http.GetFromJsonAsync<SaleOrderHeaderInfo>($"api/saleorder/getheaderbyid/{id}");
+            headerOrder.Items = await Http.GetFromJsonAsync<List<SaleOrderItemInfo>>($"api/saleorder/getitemsbyid/{id}");
+        }
+
+    }
+
+    void OnBack()
+    {
+        NavigationManager.NavigateTo("/SaleOrder/Index");
+    }
+
+}

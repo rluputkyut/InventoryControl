@@ -1,0 +1,104 @@
+﻿@page "/PurchaseOrder/Index"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Purchase Order Listing</h3>
+
+
+@if (orders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="OnAddNew">Create New PreOrder</button>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Purchase Date</th>
+                <th>Source</th>
+                <th>Warehouse</th>
+                <th>Remark</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var info in orders)
+            {
+                <tr>
+                    <td>@info.Code</td>
+                    <td>@info.PurchaseDate</td>
+                    <td>@info.Source</td>
+                    <td>@info.WarehouseName</td>
+                    <td>@info.Remark</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+
+    private List<PurchaseOrderHeaderInfo> orders;
+
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/PurchaseOrder/Add");
+    }
+
+    void OnDetails(int id)
+    {
+        NavigationManager.NavigateTo($"/PurchaseOrder/Details/{id}");
+    }
+
+    async void OnDelete(PurchaseOrderHeaderInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the Purchase Order Info '{info.Code}'?"))
+            return;
+
+        var result = await Http.DeleteAsync("api/purchaseorder/delete/" + info.Id);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        orders = await Http.GetFromJsonAsync<List<PurchaseOrderHeaderInfo>>("api/purchaseorder/getheaders");
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await Http.GetFromJsonAsync<List<PurchaseOrderHeaderInfo>>("api/purchaseorder/getheaders");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

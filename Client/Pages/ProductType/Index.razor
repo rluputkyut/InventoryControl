@@ -1,0 +1,101 @@
+﻿@page "/ProductType/index"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Product Type Listing</h3>
+
+
+@if (productTypes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="OnAddNew">Create New Product Type</button>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var info in productTypes)
+            {
+                <tr>
+                    <td>@info.Code</td>
+                    <td>@info.Name</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+
+    private List<ProductTypeInfo> productTypes;
+    public bool Show { get; set; } = false;
+    int _tempId = 0;
+
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/ProductType/Add");
+    }
+
+    void OnEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/ProductType/Edit/{id}");
+    }
+
+    async void OnDelete(ProductTypeInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the product type '{info.Name}'?"))
+            return;
+
+        Show = false;
+        var result = await Http.DeleteAsync("api/producttype/delete/" + info.Id);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        productTypes = await Http.GetFromJsonAsync<List<ProductTypeInfo>>("api/producttype/get");
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        productTypes = await Http.GetFromJsonAsync<List<ProductTypeInfo>>("api/producttype/get");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

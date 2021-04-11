@@ -1,0 +1,50 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace InventoryControl.Shared
+{
+    public class SaleOrderHeaderInfo
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Code is Required!")]
+        public string Code { get; set; }
+
+        [Required(ErrorMessage = "Warehouse is Required!")]
+        public int WarehouseId { get; set; }
+        public string WarehouseName { get; set; }
+
+        [Required(ErrorMessage = "Customer is Required!")]
+        public int CustomerId { get; set; }
+        public string CustomerName { get; set; }
+        public bool IsCOD { get; set; }
+        public bool IsAccountTransfer { get; set; }
+        public string TransferInfo { get; set; }
+        public string Remark { get; set; }
+        public DateTime SellingDate { get; set; }
+        public List<SaleOrderItemInfo> Items { get; set; }
+    }
+
+    public class SaleOrderItemInfo
+    {
+        public int Id { get; set; }
+        public int HeaderId { get; set; }
+
+        [Required(ErrorMessage = "Product is Required!")]
+        public int ProductId { get; set; }
+        public string ProductCode { get; set; }
+        public string ProductName { get; set; }
+
+        [Required(ErrorMessage = "Selling Price is Required!")]
+        public decimal SellingPrice { get; set; }
+        public decimal OtherExpense { get; set; }
+
+        [Required(ErrorMessage = "Qiantity is Required!")]
+        public int Quantity { get; set; }
+    }
+
+}

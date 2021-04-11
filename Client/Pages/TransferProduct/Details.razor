@@ -1,0 +1,122 @@
+﻿@page "/TransferProduct/Details/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Transfer Product Details</h3>
+
+@if (transferProductHeader == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                Code:
+            </dt>
+
+            <dd>
+                @transferProductHeader.Code
+            </dd>
+
+            <dt>
+                Transfer Date:
+            </dt>
+
+            <dd>
+                @transferProductHeader.TransferDate
+            </dd>
+
+            <dt>
+                From:
+            </dt>
+
+            <dd>
+                @transferProductHeader.FromWarehouseName
+            </dd>
+
+            <dt>
+                To:
+            </dt>
+
+            <dd>
+                @transferProductHeader.ToWarehouseName
+            </dd>
+
+            <dt>
+                Cost:
+            </dt>
+
+            <dd>
+                @String.Format("{0:0.00}", transferProductHeader.Cost)
+            </dd>
+
+            <dt>
+                Remark:
+            </dt>
+
+            <dd>
+                @transferProductHeader.Remark
+            </dd>
+        </dl>
+
+        <table class="table">
+            <tr>
+                <th>
+                    Product
+                </th>
+                <th>
+                    Quantity
+                </th>
+            </tr>
+
+            @foreach (var item in transferProductHeader.Items)
+            {
+            <tr>
+                <td>
+                    @item.ProductName
+                </td>
+                <td>
+                    @item.Quantity
+                </td>
+            </tr>
+            }
+
+        </table>
+
+    </div>
+
+}
+<p>
+    <button type="button" class="btn btn-secondary" @onclick="@OnBack">Back</button>
+</p>
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private TransferProductHeaderInfo transferProductHeader;
+
+    protected override async Task OnInitializedAsync()
+    {
+        transferProductHeader = new TransferProductHeaderInfo();
+        transferProductHeader.Items = new List<TransferProductItemInfo>();
+
+        if (id > 0)
+        {
+            transferProductHeader = await Http.GetFromJsonAsync<TransferProductHeaderInfo>($"api/transferproduct/getheaderbyid/{id}");
+            transferProductHeader.Items = await Http.GetFromJsonAsync<List<TransferProductItemInfo>>($"api/transferproduct/getitemsbyid/{id}");
+        }
+
+    }
+
+    void OnBack()
+    {
+        NavigationManager.NavigateTo("/TransferProduct/Index");
+    }
+
+}

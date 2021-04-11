@@ -1,0 +1,252 @@
+﻿@page "/SaleOrder/Add"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Sale Order Entry</h3>
+
+@if (headerInfo == null || headerInfo.Items == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<EditForm Model="headerInfo" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+    <DataAnnotationsValidator />
+
+    <div class="col-12 row mt-2">
+        <label for="Code" class="col-md-2 col-form-label">Code:</label>
+        <div>
+            <InputText id="Code" class="form-control" @bind-Value="headerInfo.Code" />
+            <ValidationMessage For="@(()=> headerInfo.Code)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="WarehouseId" class="col-md-2 col-form-label">Warehouse:</label>
+        <div>
+            <Select id="WarehouseId" class="form-control" @onchange="WarehouseSelectionChanged">
+                @if (warehouses != null)
+                {
+                    @foreach (var warehouse in warehouses)
+                    {
+                        var _selected = warehouse.Id == headerInfo.WarehouseId;
+                        <option value="@warehouse.Id" selected="@_selected">@warehouse.Name</option>
+                    }
+                }
+            </Select>
+            <ValidationMessage For="@(()=> headerInfo.WarehouseId)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="CustomerId" class="col-md-2 col-form-label">Customer:</label>
+        <div>
+            <InputSelect id="CustomerId" class="form-control" @bind-Value="headerInfo.CustomerId">
+                @if (customers != null)
+                    {
+                    @foreach (var info in customers)
+                        {
+                        <option value="@info.Id">@info.Name</option>
+                        }
+                    }
+            </InputSelect>
+            <ValidationMessage For="@(()=> headerInfo.CustomerId)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Payment" class="col-md-2 col-form-label">Payment Type:</label>
+        <div>
+            <label>Cash On Delivery <input type="radio" name="payType" id="COD" value="COD" @onchange="RadioSelection" checked=@headerInfo.IsCOD /></label>
+            <label>Account Transfer <input type="radio" name="payType" id="Account" value="Account" @onchange="RadioSelection" checked=@headerInfo.IsAccountTransfer /></label>            
+        </div>
+    </div>
+    @if (headerInfo.IsAccountTransfer)
+    { 
+    <div class="col-12 row mt-2">
+        <label for="TransferInfo" class="col-md-2 col-form-label">Account Information:</label>
+        <div>
+            <InputTextArea id="TransferInfo" class="form-control" @bind-Value="headerInfo.TransferInfo" />
+            <ValidationMessage For="@(()=> headerInfo.TransferInfo)" />
+        </div>
+    </div>
+    }
+    <div class="col-12 row mt-2">
+        <label for="Remark" class="col-md-2 col-form-label">Remark:</label>
+        <div>
+            <InputTextArea id="Remark" class="form-control" @bind-Value="headerInfo.Remark" />
+            <ValidationMessage For="@(()=> headerInfo.Remark)" />
+        </div>
+    </div>
+    <br />
+    <div class="row col-md-12 mt-2">
+        <div class="col-md-2">
+            <label>Product:</label>
+            <InputSelect id="ProductId" class="form-control" @bind-Value="itemInfo.ProductId">
+                @if (products != null)
+                    {
+                        <option value ="0" >Select</option>
+                    @foreach (var product in products)
+                        {
+                        <option value="@product.ProductId">@product.ProductName</option>
+                        }
+                    }
+            </InputSelect>
+        </div>
+        <div class="col-md-2">
+            <label>Quantity:</label>
+            <InputNumber id="Quantity" class="form-control" @bind-Value="itemInfo.Quantity" />
+        </div>
+        <div class="col-md-2">
+            <label>Buying Price:</label>
+            <InputNumber id="BuyingPrice" class="form-control" @bind-Value="itemInfo.SellingPrice" />
+        </div>
+        <div class="col-md-2">
+            <label>Other Expense:</label>
+            <InputNumber id="OtherExpense" class="form-control" @bind-Value="itemInfo.OtherExpense" />
+        </div>
+        <div class="col-md-2">
+            <label> </label>
+            <button type="button" class="btn btn-primary" @onclick="@AddItem">Add</button>
+            <button type="button" class="btn btn-secondary" @onclick="@Cancel">Cancel</button>
+        </div>
+    </div>
+    <br />
+    <div class="col-md-12 mt-2">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Buying Price</th>
+                    <th>Other Expense</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var info in headerInfo.Items)
+                {
+                    <tr>
+                        <td>@info.ProductName</td>
+                        <td>@info.Quantity</td>
+                        <td>@String.Format("{0:0.00}", info.SellingPrice)</td>
+                        <td>@String.Format("{0:0.00}", info.OtherExpense)</td>
+                        <td>
+                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEditItem(info.Id))">Edit</a> |
+                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDeleteItem(info.Id))">Delete</a> |
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
+        </div>
+    </div>
+</EditForm>
+}
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private SaleOrderHeaderInfo headerInfo;
+    private SaleOrderItemInfo itemInfo;
+
+    private List<WarehouseInfo> warehouses;
+    private List<CustomerInfo> customers;
+    private List<WarehouseProductInfo> products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        headerInfo = new SaleOrderHeaderInfo();
+        itemInfo = new SaleOrderItemInfo();
+
+        customers = await Http.GetFromJsonAsync<List<CustomerInfo>>($"api/customer/get");
+        //products = await Http.GetFromJsonAsync<List<ProductInfo>>($"api/product/get");
+        warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>($"api/warehouse/get");
+
+        headerInfo.Items = new List<SaleOrderItemInfo>();
+    }
+
+    void RadioSelection(ChangeEventArgs e)
+    {
+        if (e.Value.Equals("COD"))
+        {
+            headerInfo.IsCOD = true;
+            headerInfo.IsAccountTransfer = false;
+        }
+        else
+        {
+            headerInfo.IsCOD = false;
+            headerInfo.IsAccountTransfer = true;
+        }
+    }
+
+    async void WarehouseSelectionChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            var _newId = Convert.ToInt32(e.Value.ToString());
+            headerInfo.WarehouseId = _newId;
+            itemInfo = new SaleOrderItemInfo();
+            headerInfo.Items = new List<SaleOrderItemInfo>();
+            products = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{_newId}");
+            StateHasChanged();
+        }
+    }
+
+    private async Task Create()
+    {
+        await Http.PostAsJsonAsync<SaleOrderHeaderInfo>("api/saleorder/save", headerInfo);
+
+        NavigationManager.NavigateTo("/SaleOrder/Index");
+    }
+
+
+    void Back()
+    {
+        NavigationManager.NavigateTo("/SaleOrder/Index");
+    }
+
+    async void AddItem()
+    {
+        if (itemInfo != null && itemInfo.ProductId != 0)
+        {
+            var _product = products.Where(x => x.ProductId == itemInfo.ProductId).First();
+
+            if (_product.Quantity < itemInfo.Quantity)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Quanity is not enough!");
+                itemInfo.Quantity = 0;
+            }
+            else
+            {
+                itemInfo.HeaderId = id;
+                itemInfo.ProductName = _product.ProductName;
+                headerInfo.Items.Add(itemInfo);
+                itemInfo = new SaleOrderItemInfo();
+            }
+        }
+    }
+
+    void Cancel()
+    {
+        itemInfo = new SaleOrderItemInfo();
+    }
+
+    void OnEditItem(int id)
+    {
+        itemInfo = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
+    }
+
+    void OnDeleteItem(int id)
+    {
+        var _item = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
+        headerInfo.Items.Remove(_item);
+    }
+}

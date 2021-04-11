@@ -1,0 +1,184 @@
+﻿@page "/PurchaseOrder/Add"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Purchase Order Entry</h3>
+
+@if (headerInfo == null || headerInfo.Items == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<EditForm Model="headerInfo" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+    <DataAnnotationsValidator />
+
+    <div class="col-12 row mt-2">
+        <label for="Code" class="col-md-2 col-form-label">Code:</label>
+        <div>
+            <InputText id="Code" class="form-control" @bind-Value="headerInfo.Code" />
+            <ValidationMessage For="@(()=> headerInfo.Code)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Source" class="col-md-2 col-form-label">Source:</label>
+        <div>
+            <InputText id="Code" class="form-control" @bind-Value="headerInfo.Source" />
+            <ValidationMessage For="@(()=> headerInfo.Source)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="customerId" class="col-md-2 col-form-label">Warehouse:</label>
+        <div>
+            <InputSelect id="WarehouseId" class="form-control" @bind-Value="headerInfo.WarehouseId">
+                @if (warehouses != null)
+                    {
+                    @foreach (var info in warehouses)
+                        {
+                        <option value="@info.Id">@info.Name</option>
+                        }
+                    }
+            </InputSelect>
+            <ValidationMessage For="@(()=> headerInfo.WarehouseId)" />
+        </div>
+    </div>
+
+    <div class="col-12 row mt-2">
+        <label for="Remark" class="col-md-2 col-form-label">Remark:</label>
+        <div>
+            <InputTextArea id="Remark" class="form-control" @bind-Value="headerInfo.Remark" />
+            <ValidationMessage For="@(()=> headerInfo.Remark)" />
+        </div>
+    </div>
+    <br />
+    <div class="row col-md-12 mt-2">        
+        <div class="col-md-2">
+            <label>Product:</label>
+            <InputSelect id="ProductId" class="form-control" @bind-Value="itemInfo.ProductId">
+                @if (products != null)
+                    {
+                    @foreach (var product in products)
+                        {
+                        <option value="@product.Id">@product.Name</option>
+                        }
+                    }
+            </InputSelect>
+        </div>        
+        <div class="col-md-2">
+            <label>Quantity:</label>
+            <InputNumber id="Quantity" class="form-control" @bind-Value="itemInfo.Quantity" />
+        </div>        
+        <div class="col-md-2">
+            <label>Buying Price:</label>
+            <InputNumber id="BuyingPrice" class="form-control" @bind-Value="itemInfo.BuyingPrice" />
+        </div>        
+        <div class="col-md-2">
+            <label>Currency:</label>
+            <InputText id="Currency" class="form-control" @bind-Value="itemInfo.Currency" />
+        </div>
+        <div class="col-md-2 align-bottom">
+            <label> </label>
+            <button type="button" class="btn btn-primary" @onclick="@AddItem">Add</button>
+            <button type="button" class="btn btn-secondary" @onclick="@Cancel">Cancel</button>
+        </div>
+    </div>
+    <br />
+    <div class="col-md-12 mt-2">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Buying Price</th>
+                    <th>Currency</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var info in headerInfo.Items)
+                {
+                <tr>
+                    <td>@info.ProductName</td>
+                    <td>@info.Quantity</td>
+                    <td>@String.Format("{0:0.00}", info.BuyingPrice)</td>
+                    <td>@info.Currency</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEditItem(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDeleteItem(info.Id))">Delete</a> |
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
+        </div>
+    </div>
+</EditForm>
+}
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private PurchaseOrderHeaderInfo headerInfo;
+    private PurchaseOrderItemInfo itemInfo;
+
+    private List<WarehouseInfo> warehouses;
+    private List<ProductInfo> products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        headerInfo = new PurchaseOrderHeaderInfo();
+        itemInfo = new PurchaseOrderItemInfo();
+
+        products = await Http.GetFromJsonAsync<List<ProductInfo>>($"api/product/get");
+        warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>($"api/warehouse/get");
+
+        headerInfo.Items = new List<PurchaseOrderItemInfo>();
+    }
+
+    private async Task Create()
+    {
+        await Http.PostAsJsonAsync<PurchaseOrderHeaderInfo>("api/purchaseorder/save", headerInfo);
+
+        NavigationManager.NavigateTo("/PurchaseOrder/Index");
+    }
+
+
+    void Back()
+    {
+        NavigationManager.NavigateTo("/PurchaseOrder/Index");
+    }
+
+    void AddItem()
+    {
+        itemInfo.HeaderId = id;
+        itemInfo.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
+        headerInfo.Items.Add(itemInfo);
+        itemInfo = new PurchaseOrderItemInfo();
+    }
+
+    void Cancel()
+    {
+        itemInfo = new PurchaseOrderItemInfo();
+    }
+
+    void OnEditItem(int id)
+    {
+        itemInfo = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
+    }
+
+    void OnDeleteItem(int id)
+    {
+        var _item = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
+        headerInfo.Items.Remove(_item);
+    }
+}

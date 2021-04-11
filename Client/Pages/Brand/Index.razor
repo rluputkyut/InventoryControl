@@ -1,0 +1,127 @@
+@page "/Brand/index"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Brand Listing</h3>
+
+
+@if (brands == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="OnAddNew">Create New Brand</button>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var info in brands)
+            {
+                <tr>
+                    <td>@info.Code</td>
+                    <td>@info.Name</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @*@if (Show)
+        {
+            <div class="modal" tabindex="-1" role="dialog" style="display: @(Show ? "block" : "none")">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Dialog</h5>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure to delete? </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" @onclick="@(()=> OnDelete())">Ok</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="@(()=> this.Show=false)">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }*@
+
+}
+
+@code {
+
+    private List<BrandInfo> brands;
+    public bool Show { get; set; } = false;
+    int _tempId = 0;
+
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/Brand/Add");
+    }
+
+    void OnEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/Brand/Edit/{id}");
+    }
+
+    //void OnShowDialog(int id)
+    //{
+    //    Show = true;
+    //    _tempId = id;
+    //}
+
+    async void OnDelete(BrandInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the brand '{info.Name}'?"))
+            return;
+
+        Show = false;
+        var result = await Http.DeleteAsync("api/brand/delete/" + info.Id);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        brands = await Http.GetFromJsonAsync<List<BrandInfo>>("api/brand/get");
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        brands = await Http.GetFromJsonAsync<List<BrandInfo>>("api/brand/get");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

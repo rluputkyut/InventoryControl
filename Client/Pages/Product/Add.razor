@@ -1,0 +1,175 @@
+﻿@page "/Product/Add"
+@page "/Product/Edit/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Product Entry</h3>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (product == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<EditForm Model="product" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+    <DataAnnotationsValidator />
+
+    <div class="col-12 row mt-2">
+        <label for="Code" class="col-md-2 col-form-label">Code:</label>
+        <div>
+            <InputText id="Code" class="form-control" @bind-Value="product.Code" />
+            <ValidationMessage For="@(()=> product.Code)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Name" class="col-md-2 col-form-label">Name:</label>
+        <div>
+            <InputText id="Name" class="form-control" @bind-Value="product.Name" />
+            <ValidationMessage For="@(()=> product.Name)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Description" class="col-md-2 col-form-label">Description:</label>
+        <div>
+            <InputTextArea id="Description" class="form-control" @bind-Value="product.Description" />
+            <ValidationMessage For="@(()=> product.Description)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="BrandId" class="col-md-2 col-form-label">Brand:</label>
+        <div>
+            <InputSelect id="BrandId" class="form-control" @bind-Value="product.BrandId">
+                @if (brands != null)
+                    {
+                    @foreach (var brand in brands)
+                        {
+                        <option value="@brand.Id">@brand.Name</option>
+                        }
+                    }
+            </InputSelect>
+            <ValidationMessage For="@(()=> product.BrandId)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="ProductTypeId" class="col-md-2 col-form-label">ProductType:</label>
+        <div>
+            <InputSelect id="ProductTypeId" class="form-control" @bind-Value="product.ProductTypeId">
+                @if (productTypes != null)
+                    {
+                    @foreach (var productType in productTypes)
+                        {
+                        <option value="@productType.Id">@productType.Name</option>
+                        }
+                    }
+            </InputSelect>
+            <ValidationMessage For="@(()=> product.ProductTypeId)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Price" class="col-md-2 col-form-label">Price:</label>
+        <div>
+            <InputNumber id="Price" class="form-control" @bind-Value="product.Price" />
+            <ValidationMessage For="@(()=> product.Price)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Size" class="col-md-2 col-form-label">Size:</label>
+        <div>
+            <InputNumber id="Size" class="form-control" @bind-Value="product.Size" />
+            <ValidationMessage For="@(()=> product.Size)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="ManufactureDate" class="col-md-2 col-form-label">ManufactureDate:</label>
+        <div>
+            <InputDate id="ManufactureDate" class="form-control" @bind-Value="product.ManufactureDate" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="ExpiredDate" class="col-md-2 col-form-label">ExpiredDate:</label>
+        <div>
+            <InputDate id="ExpiredDate" class="form-control" @bind-Value="product.ExpiredDate" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Photo" class="col-md-2 col-form-label">Photo:</label>
+        <div class="col-md-6">
+            <InputFile type="file" title="search image" id="Photo" name="file" OnChange="@OnInputFileChange" />
+        </div>
+        <div class="col-md-6">
+            <img class="rounded m-1" src="@_imageData" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
+        </div>
+    </div>
+</EditForm>
+}
+<br />
+
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private ProductInfo product;
+
+    private List<BrandInfo> brands;
+    private List<ProductTypeInfo> productTypes;
+    private string _imageData = string.Empty;
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var maxAllowedFiles = 3;
+        var format = "image/png";
+
+        foreach (var imageFile in e.GetMultipleFiles(maxAllowedFiles))
+        {
+            var resizedImageFile = await imageFile.RequestImageFileAsync(format,
+                100, 100);
+            var buffer = new byte[resizedImageFile.Size];
+            await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+            product.Photo = $"{Convert.ToBase64String(buffer)}";
+            _imageData = $"data:{format};base64,{product.Photo}";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //brands = new List<BrandInfo>();
+        //productTypes = new List<ProductTypeInfo>();
+
+        productTypes = await Http.GetFromJsonAsync<List<ProductTypeInfo>>($"api/producttype/get");
+        brands = await Http.GetFromJsonAsync<List<BrandInfo>>($"api/brand/get");
+        product = new ProductInfo();
+
+        if (id > 0)
+        {
+            product = await Http.GetFromJsonAsync<ProductInfo>($"api/product/getbyid/{id}");
+            _imageData = string.IsNullOrEmpty(product.Photo)? string.Empty : $"data:png;base64,{product.Photo}";
+        }
+    }
+
+    private async Task Create()
+    {
+
+        if (product.Id == 0)
+            await Http.PostAsJsonAsync<ProductInfo>("api/product/save", product);
+        else
+            await Http.PutAsJsonAsync<ProductInfo>("api/product/update", product);
+
+        NavigationManager.NavigateTo("/product/Index");
+    }
+
+    void Back()
+    {
+        NavigationManager.NavigateTo("/product/Index");
+    }
+}

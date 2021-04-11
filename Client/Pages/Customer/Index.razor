@@ -1,0 +1,108 @@
+﻿@page "/Customer/index"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Customer Listing</h3>
+
+
+@if (customers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="OnAddNew">Create New Product Type</button>
+    </p>
+
+    <table class="table col-lg-10 col-md-10 col-sm-10">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Nick Name</th>
+                <th>Phone No</th>
+                <th>Address</th>
+                <th>Account Information</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var info in customers)
+            {
+                <tr>
+                    <td>@info.Name</td>
+                    <td>@info.NickName</td>
+                    <td>@info.PhoneNo</td>
+                    <td>@info.Address</td>
+                    <td>@info.AccountInformation</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+
+    private List<CustomerInfo> customers;
+    public bool Show { get; set; } = false;
+    int _tempId = 0;
+
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/Customer/Add");
+    }
+
+    void OnEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/Customer/Edit/{id}");
+    }
+
+
+    async void OnDelete(CustomerInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the customer '{info.Name}'?"))
+            return;
+
+        Show = false;
+        var result = await Http.DeleteAsync("api/customer/delete/" + info.Id);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        customers = await Http.GetFromJsonAsync<List<CustomerInfo>>("api/customer/get");
+
+        StateHasChanged();
+    }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    products = await Http.GetFromJsonAsync<List<ProductInfo>>("api/product/get");
+    //}
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

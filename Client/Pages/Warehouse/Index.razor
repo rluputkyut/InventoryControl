@@ -14,7 +14,7 @@
 else
 {
     <p>
-        <button class="btn btn-primary" @onclick="OnAddNew">Create New Brand</button>
+        <button class="btn btn-primary" @onclick="OnAddNew">Create New Warehouse</button>
     </p>
 
     <table class="table">
@@ -34,7 +34,7 @@ else
                     <td>
                         <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
                         <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Add Products</a>
                     </td>
                 </tr>
             }

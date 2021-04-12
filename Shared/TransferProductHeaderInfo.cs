@@ -14,19 +14,24 @@ namespace InventoryControl.Shared
         [Required(ErrorMessage = "Code is Required!")]
         public string Code { get; set; }
 
-        [Required(ErrorMessage = "From Warehouse is Required!")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "From Warehouse is Required!")]
         public int FromWarehouseId { get; set; }
         public string FromWarehouseName { get; set; }
 
-        [Required(ErrorMessage = "To Warehouse is Required!")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "To Warehouse is Required!")]
         public int ToWarehouseId { get; set; }
         public string ToWarehouseName { get; set; }
 
         [Required(ErrorMessage = "Cost is Required!")]
+        [Range(0, int.MaxValue, ErrorMessage = "Invalid Value!")]
         public decimal Cost { get; set; }
         public string Remark { get; set; }
 
         public DateTime TransferDate { get; set; }
+
+        [Required(ErrorMessage = "Products are Required!"), MinLength(1,ErrorMessage = "Products are Required!")]
         public List<TransferProductItemInfo> Items { get; set; }
     }
 
@@ -35,12 +40,14 @@ namespace InventoryControl.Shared
         public int Id { get; set; }
         public int HeaderId { get; set; }
 
-        [Required(ErrorMessage = "Product is Required!")]
+        //[Required]
+        //[Range(1, int.MaxValue, ErrorMessage = "Product is Required!")]
         public int ProductId { get; set; }
         public string ProductCode { get; set; }
         public string ProductName { get; set; }
 
-        [Required(ErrorMessage = "Qiantity is Required!")]
+        //[Required(ErrorMessage = "Qiantity is Required!")]
+        //[Range(1, int.MaxValue, ErrorMessage = "Invalid Value!")]
         public int Quantity { get; set; }
        
     }

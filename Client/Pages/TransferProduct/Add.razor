@@ -29,6 +29,7 @@ else
                 <Select id="FromWarehouseId" class="form-control" @onchange="FromWarehouseSelectionChanged">
                     @if (warehouses != null)
                     {
+                        <option value="0">Select</option>
                         @foreach (var warehouse in warehouses)
                         {
                             var _selected = warehouse.Id == transferProductHeader.FromWarehouseId;
@@ -45,6 +46,7 @@ else
                 <Select id="ToWarehouseId" class="form-control" @onchange="ToWarehouseSelectionChanged">
                     @if (warehouses != null)
                     {
+                        <option value="0">Select</option>
                         @foreach (var warehouse in warehouses)
                         {
                             var _selected = warehouse.Id == transferProductHeader.ToWarehouseId;
@@ -75,16 +77,17 @@ else
                 <InputSelect id="ProductId" class="form-control" @bind-Value="transferProductItem.ProductId">
                     @if (products != null)
                         {
+                        <option value="0">Select</option>
                         @foreach (var product in products)
                             {
-                            <option value="@product.Id">@product.ProductName</option>
+                            <option value="@product.ProductId">@product.ProductName</option>
                             }
                         }
-                </InputSelect>
+                </InputSelect>                
             </div>
             <label class="col-md-2">Quantity:</label>
             <div class="col-md-2">
-                <InputNumber id="Quantity" class="form-control" @bind-Value="transferProductItem.Quantity" />
+                <InputNumber id="Quantity" class="form-control" @bind-Value="@transferProductItem.Quantity" @onchange="QuantityChange" />                
             </div>
             <div class="col-md-2">
                 <button type="button" class="btn btn-primary" @onclick="@AddItem">Add</button>
@@ -115,6 +118,7 @@ else
                     }
                 </tbody>
             </table>
+            <ValidationMessage For="@(()=> transferProductHeader.Items)" />
         </div>
 
         <div class="row">
@@ -130,6 +134,7 @@ else
 
     [Parameter]
     public int id { get; set; }
+    bool isItemEdit;
 
     private TransferProductHeaderInfo transferProductHeader;
     private TransferProductItemInfo transferProductItem;
@@ -140,9 +145,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>($"api/warehouse/get");
         transferProductItem = new TransferProductItemInfo();
         transferProductHeader = new TransferProductHeaderInfo();
+        warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>($"api/warehouse/get");
 
         if (id > 0)
         {
@@ -170,6 +175,10 @@ else
         NavigationManager.NavigateTo("/TransferProduct/Index");
     }
 
+    void QuantityChange(ChangeEventArgs e)
+    {
+
+    }
 
     async void FromWarehouseSelectionChanged(ChangeEventArgs e)
     {
@@ -205,27 +214,79 @@ else
         NavigationManager.NavigateTo("/TransferProduct/Index");
     }
 
-    void AddItem()
+    async void AddItem()
     {
-        transferProductItem.HeaderId = id;
-        transferProductItem.ProductName = products.Where(x => x.Id == transferProductItem.ProductId).Select(x => x.ProductName).FirstOrDefault();
-        transferProductHeader.Items.Add(transferProductItem);
+        if (transferProductItem.ProductId == 0 || transferProductItem.Quantity == 0)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Invalid Data!");
+            return;
+        }
+        else if (products.Where(x => x.ProductId == transferProductItem.ProductId && x.Quantity < transferProductItem.Quantity).Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Quantity is not enough!");
+            return;
+        }
+        else if (!isItemEdit && transferProductHeader.Items.Where(x => x.ProductId == transferProductItem.ProductId).Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Duplicate Product!");
+            return;
+        }
+
+        if (isItemEdit)
+        {
+            var item = transferProductHeader.Items.Where(x => x.Id == transferProductItem.Id).First();
+            item.ProductId = transferProductItem.ProductId;
+            item.ProductName = products.Where(x => x.ProductId == transferProductItem.ProductId).Select(x => x.ProductName).First();
+            item.Quantity = transferProductItem.Quantity;
+        }
+        else
+        {
+            transferProductItem.Id = GenerateId();
+            transferProductItem.HeaderId = id;
+            transferProductItem.ProductName = products.Where(x => x.ProductId == transferProductItem.ProductId).Select(x => x.ProductName).First();
+            transferProductHeader.Items.Add(transferProductItem);
+        }
+
         transferProductItem = new TransferProductItemInfo();
+        isItemEdit = false;
     }
 
     void Cancel()
     {
         transferProductItem = new TransferProductItemInfo();
+        isItemEdit = false;
     }
 
     void OnEditItem(int id)
     {
-        transferProductItem = transferProductHeader.Items.Where(x => x.Id == id).FirstOrDefault();
+        var item = transferProductHeader.Items.Where(x => x.Id == id).FirstOrDefault();
+        transferProductItem.Id = item.Id;
+        transferProductItem.HeaderId = item.HeaderId;
+        transferProductItem.ProductId = item.ProductId;
+        transferProductItem.ProductName = item.ProductName;
+        transferProductItem.Quantity = item.Quantity;
+
+        isItemEdit = true;
     }
 
     void OnDeleteItem(int id)
     {
         var _item = transferProductHeader.Items.Where(x => x.Id == id).FirstOrDefault();
         transferProductHeader.Items.Remove(_item);
+    }
+
+    int GenerateId()
+    {
+        int _id;
+        if (transferProductHeader.Items.Count == 0)
+        {
+            _id = 1;
+        }
+        else
+        {
+            _id = transferProductHeader.Items.OrderByDescending(x => x.Id).Select(x=>x.Id).First();
+            _id++;
+        }
+        return _id;
     }
 }

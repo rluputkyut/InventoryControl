@@ -10,16 +10,20 @@ namespace InventoryControl.Shared
     public class WarehouseProductInfo
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Warehouse is Required!")]
         public int WarehouseId { get; set; }
         public string WarehouseName { get; set; }
 
-        [Required(ErrorMessage = "Product is Required!")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Product is Required!")]
         public int ProductId { get; set; }
         public string ProductName { get; set; }
 
         public string ProductCode { get; set; }
 
-        [Required(ErrorMessage = "Quantity is Required!")]
+        [Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Quantity is Required!")]
         public int Quantity { get; set; }
 
     }

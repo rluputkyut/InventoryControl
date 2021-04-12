@@ -13,7 +13,7 @@
 }
 else
 {
-    <EditForm Model="warehouse" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+    <EditForm Model="wProduct" OnValidSubmit="Create" class="card card-body bg-light mt-2">
         <DataAnnotationsValidator />
 
         <div class="col-12 row mt-2">
@@ -34,6 +34,7 @@ else
                 <InputSelect id="ProductId" class="form-control" @bind-Value="wProduct.ProductId">
                     @if (products != null)
                         {
+                        <option value="0">Select</option>
                         @foreach (var info in products)
                             {
                             <option value="@info.Id">@info.Name</option>

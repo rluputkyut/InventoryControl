@@ -22,14 +22,19 @@ namespace InventoryControl.Shared
 
         public string Photo { get; set; }
 
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Brand is Required!")]
         public int BrandId { get; set; }
         public string BrandName { get; set; }
 
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "ProductType is Required!")]
         public int ProductTypeId { get; set; }
         public string ProductTypeName { get; set; }
 
         public decimal? Size { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "Price is Required!")]
         public decimal? Price { get; set; }
         public DateTime? ManufactureDate { get; set; }
         public DateTime? ExpiredDate { get; set; }

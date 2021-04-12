@@ -17,6 +17,8 @@ namespace InventoryControl.Shared
         [Required(ErrorMessage = "NickName is Required!")]
         public string NickName { get; set; }
 
+        [DataType(DataType.PhoneNumber)]
+        [RegularExpression(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$", ErrorMessage = "Invalid Phone No!")]
         public string PhoneNo { get; set; }
 
         public string Address { get; set; }

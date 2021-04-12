@@ -44,6 +44,7 @@ else
             <InputSelect id="BrandId" class="form-control" @bind-Value="product.BrandId">
                 @if (brands != null)
                     {
+                    <option value="0">Select</option>
                     @foreach (var brand in brands)
                         {
                         <option value="@brand.Id">@brand.Name</option>
@@ -59,6 +60,7 @@ else
             <InputSelect id="ProductTypeId" class="form-control" @bind-Value="product.ProductTypeId">
                 @if (productTypes != null)
                     {
+                    <option value="0">Select</option>
                     @foreach (var productType in productTypes)
                         {
                         <option value="@productType.Id">@productType.Name</option>
@@ -145,10 +147,10 @@ else
     {
         //brands = new List<BrandInfo>();
         //productTypes = new List<ProductTypeInfo>();
-
-        productTypes = await Http.GetFromJsonAsync<List<ProductTypeInfo>>($"api/producttype/get");
-        brands = await Http.GetFromJsonAsync<List<BrandInfo>>($"api/brand/get");
         product = new ProductInfo();
+        brands = await Http.GetFromJsonAsync<List<BrandInfo>>($"api/brand/get");
+        productTypes = await Http.GetFromJsonAsync<List<ProductTypeInfo>>($"api/producttype/get");
+
 
         if (id > 0)
         {

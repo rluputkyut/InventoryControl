@@ -216,7 +216,7 @@ else
 
     async void AddItem()
     {
-        if (transferProductItem.ProductId == 0 || transferProductItem.Quantity == 0)
+        if (transferProductItem.ProductId == 0 || transferProductItem.Quantity <= 0)
         {
             await JSRuntime.InvokeVoidAsync("alert", $"Invalid Data!");
             return;

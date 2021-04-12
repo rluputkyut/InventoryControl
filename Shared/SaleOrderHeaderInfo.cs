@@ -14,18 +14,23 @@ namespace InventoryControl.Shared
         [Required(ErrorMessage = "Code is Required!")]
         public string Code { get; set; }
 
-        [Required(ErrorMessage = "Warehouse is Required!")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Warehouse is Required!")]
         public int WarehouseId { get; set; }
         public string WarehouseName { get; set; }
 
-        [Required(ErrorMessage = "Customer is Required!")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Customer is Required!")]
         public int CustomerId { get; set; }
         public string CustomerName { get; set; }
         public bool IsCOD { get; set; }
         public bool IsAccountTransfer { get; set; }
+                
         public string TransferInfo { get; set; }
         public string Remark { get; set; }
         public DateTime SellingDate { get; set; }
+
+        [Required(ErrorMessage = "Products are Required!"), MinLength(1, ErrorMessage = "Products are Required!")]
         public List<SaleOrderItemInfo> Items { get; set; }
     }
 

@@ -29,6 +29,7 @@ else
             <InputSelect id="CustomerId" class="form-control" @bind-Value="headerInfo.CustomerId">
                 @if (customers != null)
                     {
+                        <option value="0">Select</option>
                     @foreach (var info in customers)
                         {
                         <option value="@info.Id">@info.Name</option>
@@ -66,6 +67,7 @@ else
             <InputSelect id="ProductId" class="form-control" @bind-Value="itemInfo.ProductId">
                 @if (products != null)
                     {
+                        <option value="0">Select</option>
                     @foreach (var product in products)
                         {
                         <option value="@product.Id">@product.Name</option>
@@ -106,6 +108,7 @@ else
                 }
             </tbody>
         </table>
+        <ValidationMessage For="@(()=> headerInfo.Items)" />
     </div>
 
     <div class="row">
@@ -121,6 +124,7 @@ else
 
     [Parameter]
     public int id { get; set; }
+    bool isItemEdit;
 
     private PreOrderHeaderInfo headerInfo;
     private PreOrderItemInfo itemInfo;
@@ -164,27 +168,74 @@ else
         NavigationManager.NavigateTo("/PreOrder/Index");
     }
 
-    void AddItem()
+    async void AddItem()
     {
-        itemInfo.HeaderId = id;
-        itemInfo.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
-        headerInfo.Items.Add(itemInfo);
+        if (itemInfo.ProductId == 0 || itemInfo.Quantity <= 0)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Invalid Data!");
+            return;
+        }
+        else if (!isItemEdit && headerInfo.Items.Where(x => x.ProductId == itemInfo.ProductId).Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Duplicate Product!");
+            return;
+        }
+
+        if (isItemEdit)
+        {
+            var item = headerInfo.Items.Where(x => x.Id == itemInfo.Id).First();
+            item.ProductId = itemInfo.ProductId;
+            item.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
+            item.Quantity = itemInfo.Quantity;
+        }
+        else
+        {
+            itemInfo.Id = GenerateId();
+            itemInfo.HeaderId = id;
+            itemInfo.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
+            headerInfo.Items.Add(itemInfo);
+        }
+
         itemInfo = new PreOrderItemInfo();
+        isItemEdit = false;
     }
 
     void Cancel()
     {
         itemInfo = new PreOrderItemInfo();
+        isItemEdit = false;
     }
 
     void OnEditItem(int id)
     {
-        itemInfo = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
+        var item = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
+        itemInfo.Id = item.Id;
+        itemInfo.HeaderId = item.HeaderId;
+        itemInfo.ProductId = item.ProductId;
+        itemInfo.ProductName = item.ProductName;
+        itemInfo.Quantity = item.Quantity;
+
+        isItemEdit = true;
     }
 
     void OnDeleteItem(int id)
     {
         var _item = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
         headerInfo.Items.Remove(_item);
+    }
+
+    int GenerateId()
+    {
+        int _id;
+        if (headerInfo.Items.Count == 0)
+        {
+            _id = 1;
+        }
+        else
+        {
+            _id = headerInfo.Items.OrderByDescending(x => x.Id).Select(x => x.Id).First();
+            _id++;
+        }
+        return _id;
     }
 }

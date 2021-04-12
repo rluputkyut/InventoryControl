@@ -14,7 +14,8 @@ namespace InventoryControl.Shared
         [Required(ErrorMessage = "Code is Required!")]
         public string Code { get; set; }
 
-        [Required(ErrorMessage = "Warehouse is Required!")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Warehouse is Required!")]
         public int WarehouseId { get; set; }
         public string WarehouseName { get; set; }
 
@@ -22,6 +23,8 @@ namespace InventoryControl.Shared
         public string Source { get; set; }
         public string Remark { get; set; }
         public DateTime PurchaseDate { get; set; }
+
+        [Required(ErrorMessage = "Products are Required!"), MinLength(1, ErrorMessage = "Products are Required!")]
         public List<PurchaseOrderItemInfo> Items { get; set; }
     }
 

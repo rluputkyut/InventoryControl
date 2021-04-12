@@ -14,13 +14,20 @@ namespace InventoryControl.Shared
         [Required(ErrorMessage = "Code is Required!")]
         public string Code { get; set; }
 
-        [Required(ErrorMessage = "Customer is Required!")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Customer is Required!")]
         public int CustomerId { get; set; }
         public string CustomerName { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Invalid Deposit!")]
         public decimal Deposit { get; set; }
         public string Remark { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Invalid Waiting Day(s)!")]
         public int WaitingDays { get; set; }
         public DateTime OrderDate { get; set; }
+
+        [Required(ErrorMessage = "Products are Required!"), MinLength(1, ErrorMessage = "Products are Required!")]
         public List<PreOrderItemInfo> Items { get; set; }
     }
 

@@ -28,6 +28,7 @@ else
             <Select id="WarehouseId" class="form-control" @onchange="WarehouseSelectionChanged">
                 @if (warehouses != null)
                 {
+                        <option value="0">Select</option>
                     @foreach (var warehouse in warehouses)
                     {
                         var _selected = warehouse.Id == headerInfo.WarehouseId;
@@ -44,6 +45,7 @@ else
             <InputSelect id="CustomerId" class="form-control" @bind-Value="headerInfo.CustomerId">
                 @if (customers != null)
                     {
+                        <option value="0">Select</option>
                     @foreach (var info in customers)
                         {
                         <option value="@info.Id">@info.Name</option>
@@ -104,7 +106,7 @@ else
             <label>Other Expense:</label>
             <InputNumber id="OtherExpense" class="form-control" @bind-Value="itemInfo.OtherExpense" />
         </div>
-        <div class="col-md-2">
+        <div class="col-md-8 text-right mt-2">
             <label> </label>
             <button type="button" class="btn btn-primary" @onclick="@AddItem">Add</button>
             <button type="button" class="btn btn-secondary" @onclick="@Cancel">Cancel</button>
@@ -138,6 +140,7 @@ else
                 }
             </tbody>
         </table>
+        <ValidationMessage For="@(()=> headerInfo.Items)" />
     </div>
 
     <div class="row">
@@ -153,6 +156,7 @@ else
 
     [Parameter]
     public int id { get; set; }
+    bool isItemEdit;
 
     private SaleOrderHeaderInfo headerInfo;
     private SaleOrderItemInfo itemInfo;
@@ -215,33 +219,61 @@ else
 
     async void AddItem()
     {
-        if (itemInfo != null && itemInfo.ProductId != 0)
+        if (itemInfo.ProductId == 0 || itemInfo.Quantity <= 0 || itemInfo.SellingPrice < 0 || itemInfo.OtherExpense < 0)
         {
-            var _product = products.Where(x => x.ProductId == itemInfo.ProductId).First();
-
-            if (_product.Quantity < itemInfo.Quantity)
-            {
-                await JSRuntime.InvokeVoidAsync("alert", $"Quanity is not enough!");
-                itemInfo.Quantity = 0;
-            }
-            else
-            {
-                itemInfo.HeaderId = id;
-                itemInfo.ProductName = _product.ProductName;
-                headerInfo.Items.Add(itemInfo);
-                itemInfo = new SaleOrderItemInfo();
-            }
+            await JSRuntime.InvokeVoidAsync("alert", $"Invalid Data!");
+            return;
         }
+        else if (products.Where(x => x.ProductId == itemInfo.ProductId && x.Quantity < itemInfo.Quantity).Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Quantity is not enough!");
+            return;
+        }
+        else if (!isItemEdit && headerInfo.Items.Where(x => x.ProductId == itemInfo.ProductId).Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Duplicate Product!");
+            return;
+        }
+
+        if (isItemEdit)
+        {
+            var item = headerInfo.Items.Where(x => x.Id == itemInfo.Id).First();
+            item.ProductId = itemInfo.ProductId;
+            item.ProductName = products.Where(x => x.ProductId == itemInfo.ProductId).Select(x => x.ProductName).FirstOrDefault();
+            item.Quantity = itemInfo.Quantity;
+            item.SellingPrice = itemInfo.SellingPrice;
+            item.OtherExpense = itemInfo.OtherExpense;
+        }
+        else
+        {
+            itemInfo.Id = GenerateId();
+            itemInfo.HeaderId = id;
+            itemInfo.ProductName = products.Where(x => x.ProductId == itemInfo.ProductId).Select(x => x.ProductName).FirstOrDefault();
+            headerInfo.Items.Add(itemInfo);
+        }
+
+        itemInfo = new SaleOrderItemInfo();
+        isItemEdit = false;
     }
 
     void Cancel()
     {
         itemInfo = new SaleOrderItemInfo();
+        isItemEdit = false;
     }
 
     void OnEditItem(int id)
     {
-        itemInfo = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
+        var item = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
+        itemInfo.Id = item.Id;
+        itemInfo.HeaderId = item.HeaderId;
+        itemInfo.ProductId = item.ProductId;
+        itemInfo.ProductName = item.ProductName;
+        itemInfo.Quantity = item.Quantity;
+        itemInfo.SellingPrice = item.SellingPrice;
+        itemInfo.OtherExpense = item.OtherExpense;
+
+        isItemEdit = true;
     }
 
     void OnDeleteItem(int id)
@@ -249,4 +281,20 @@ else
         var _item = headerInfo.Items.Where(x => x.Id == id).FirstOrDefault();
         headerInfo.Items.Remove(_item);
     }
+
+    int GenerateId()
+    {
+        int _id;
+        if (headerInfo.Items.Count == 0)
+        {
+            _id = 1;
+        }
+        else
+        {
+            _id = headerInfo.Items.OrderByDescending(x => x.Id).Select(x => x.Id).First();
+            _id++;
+        }
+        return _id;
+    }
+
 }

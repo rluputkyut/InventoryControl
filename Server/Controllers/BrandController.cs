@@ -1,5 +1,6 @@
 ﻿using InventoryControl.Server.Models;
 using InventoryControl.Shared;
+using InventoryControl.Shared.RequestFeatures;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -24,7 +25,7 @@ namespace InventoryControl.Server.Controllers
 
         [HttpGet]
         [Route("get")]
-        public List<BrandInfo> Get()
+        public List<BrandInfo> Get([FromQuery] PageParameters parameters)
         {
             List<BrandInfo> _brands = new List<BrandInfo>();
             var _brandList = _dbContext.Brands.Where(x=>x.IsActive).ToList();
@@ -39,7 +40,16 @@ namespace InventoryControl.Server.Controllers
                 _brands.Add(_info);
             });
 
-            return _brands;
+            var response = PagedList<BrandInfo>.ToPagedList(_brands, parameters.PageNumber, parameters.PageSize);
+            response.ForEach(x => 
+            {
+                x.CurrentPage = response.MetaData.CurrentPage;
+                x.PageSize = response.MetaData.PageSize;
+                x.TotalCount = response.MetaData.TotalCount;
+                x.TotalPages = response.MetaData.TotalPages;
+            });
+
+            return response.ToList();
         }
 
         [HttpGet]

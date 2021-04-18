@@ -29,6 +29,7 @@ namespace InventoryControl.Shared
         public string TransferInfo { get; set; }
         public string Remark { get; set; }
         public DateTime SellingDate { get; set; }
+        public bool Delivered { get; set; }
 
         [Required(ErrorMessage = "Products are Required!"), MinLength(1, ErrorMessage = "Products are Required!")]
         public List<SaleOrderItemInfo> Items { get; set; }

@@ -1,5 +1,8 @@
 @page "/Brand/index"
+@using InventoryControl.Client.Features
+@using InventoryControl.Client.Components
 @using InventoryControl.Shared
+@using InventoryControl.Shared.RequestFeatures
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -17,29 +20,35 @@ else
         <button class="btn btn-primary" @onclick="OnAddNew">Create New Brand</button>
     </p>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var info in brands)
-            {
+    <div class="row col-12">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@info.Code</td>
-                    <td>@info.Name</td>
-                    <td>
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
-                    </td>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th></th>
                 </tr>
-            }
-        </tbody>
-    </table>
-
+            </thead>
+            <tbody>
+                @foreach (var info in brands)
+                {
+                    <tr>
+                        <td>@info.Code</td>
+                        <td>@info.Name</td>
+                        <td>
+                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
     @*@if (Show)
         {
             <div class="modal" tabindex="-1" role="dialog" style="display: @(Show ? "block" : "none")">
@@ -63,7 +72,8 @@ else
 }
 
 @code {
-
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters();
     private List<BrandInfo> brands;
     public bool Show { get; set; } = false;
     int _tempId = 0;
@@ -100,14 +110,20 @@ else
     {
         await Task.Delay(500);
 
-        brands = await Http.GetFromJsonAsync<List<BrandInfo>>("api/brand/get");
+        await GetBrands(_pageParameters);
 
         StateHasChanged();
     }
 
+    private async Task SelectedPage(int page)
+    {
+        _pageParameters.PageNumber = page;
+        await GetBrands(_pageParameters);
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        brands = await Http.GetFromJsonAsync<List<BrandInfo>>("api/brand/get");
+        await GetBrands(_pageParameters);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -124,4 +140,23 @@ else
         await base.OnAfterRenderAsync(firstRender);
     }
 
+
+    async Task GetBrands(PageParameters parameters)
+    {
+        //var queryStringParam = new Dictionary<string, string>
+        //{
+        //    ["pageNumber"] = productParameters.PageNumber.ToString()
+        //};
+        //var response = await _client.GetAsync(QueryHelpers.AddQueryString("https://localhost:5011/api/products", queryStringParam));
+        var response = await Http.GetFromJsonAsync<List<BrandInfo>>($"api/brand/get?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+
+        brands = response;
+        MetaData = new MetaData()
+        {
+            CurrentPage = response[0].CurrentPage,
+            PageSize = response[0].PageSize,
+            TotalCount = response[0].TotalCount,
+            TotalPages = response[0].TotalPages
+        };
+    }
 }

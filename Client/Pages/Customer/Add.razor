@@ -17,6 +17,13 @@ else
     <DataAnnotationsValidator />
 
     <div class="col-12 row mt-2">
+        <label for="Code" class="col-md-2 col-form-label">Code:</label>
+        <div>
+            <InputText id="Code" class="form-control" @bind-Value="customer.Code" />
+            <ValidationMessage For="@(()=> customer.Code)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
         <label for="Name" class="col-md-2 col-form-label">Name:</label>
         <div>
             <InputText id="Name" class="form-control" @bind-Value="customer.Name" />
@@ -40,18 +47,18 @@ else
     <div class="col-12 row mt-2">
         <label for="Address" class="col-md-2 col-form-label">Address:</label>
         <div>
-            <InputText id="Address" class="form-control" @bind-Value="customer.Address" />
+            <InputTextArea id="Address" class="form-control" @bind-Value="customer.Address" />
             <ValidationMessage For="@(()=> customer.Address)" />
         </div>
     </div>
     <div class="col-12 row mt-2">
         <label for="AccountInformation" class="col-md-2 col-form-label">Account Info:</label>
         <div>
-            <InputText id="AccountInformation" class="form-control" @bind-Value="customer.AccountInformation" />
+            <InputTextArea id="AccountInformation" class="form-control" @bind-Value="customer.AccountInformation" />
             <ValidationMessage For="@(()=> customer.AccountInformation)" />
         </div>
     </div>
-    <div class="row">
+    <div class="row mt-2">
         <div class="col-md-12 text-right">
             <button type="submit" class="btn btn-success">Save</button>
             <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>

@@ -33,6 +33,7 @@ namespace InventoryControl.Server.Controllers
                 CustomerInfo _info = new CustomerInfo()
                 {
                     Id = x.Id,
+                    Code = x.Code,
                     Name = x.Name,
                     NickName = x.NickName,
                     AccountInformation = x.AccountInformation,
@@ -56,7 +57,8 @@ namespace InventoryControl.Server.Controllers
                 var _info = _dbContext.Customers.Where(x => x.Id == id && x.IsActive).First();
                 _customer = new CustomerInfo() 
                 { 
-                    Id = _info.Id, 
+                    Id = _info.Id,
+                    Code = _info.Code,
                     Name = _info.Name,
                     NickName = _info.NickName,
                     Address = _info.Address,
@@ -89,6 +91,7 @@ namespace InventoryControl.Server.Controllers
                 CustomerInfo _info = new CustomerInfo()
                 {
                     Id = x.Id,
+                    Code = x.Code,
                     Name = x.Name,
                     NickName = x.NickName,
                     AccountInformation = x.AccountInformation,
@@ -110,6 +113,7 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.Customers.Where(x => x.Id == info.Id && x.IsActive).Any())
             {
                 var _info = _dbContext.Customers.Where(x => x.Id == info.Id && x.IsActive).First();
+                _info.Code = info.Code;
                 _info.Name = info.Name;
                 _info.NickName = info.NickName;
                 _info.AccountInformation = info.AccountInformation;
@@ -129,6 +133,7 @@ namespace InventoryControl.Server.Controllers
             int _id = 0;
             var _customer = new Customer()
             {
+                Code = info.Code,
                 Name = info.Name,
                 NickName = info.NickName,
                 Address = info.Address,

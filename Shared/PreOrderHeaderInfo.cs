@@ -26,6 +26,7 @@ namespace InventoryControl.Shared
         [Range(1, int.MaxValue, ErrorMessage = "Invalid Waiting Day(s)!")]
         public int WaitingDays { get; set; }
         public DateTime OrderDate { get; set; }
+        public bool SoldOut { get; set; }
 
         [Required(ErrorMessage = "Products are Required!"), MinLength(1, ErrorMessage = "Products are Required!")]
         public List<PreOrderItemInfo> Items { get; set; }

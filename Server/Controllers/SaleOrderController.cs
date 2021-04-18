@@ -43,6 +43,7 @@ namespace InventoryControl.Server.Controllers
                     WarehouseName = _warehouses.Where(y => y.Id == x.WarehouseId).Select(y => y.Name).First(),
                     SellingDate = x.CreatedDate,
                     Remark = x.Remark,
+                    Delivered = x.Delivered,
                     IsCOD = x.CashOnDelivery,
                     IsAccountTransfer = x.AccountTransfer,
                     TransferInfo = x.TransferInformation,                    
@@ -67,6 +68,7 @@ namespace InventoryControl.Server.Controllers
                 _info.CustomerId = _header.CustomerId;
                 _info.CustomerName = _dbContext.Customers.Where(x => x.Id == _header.CustomerId).Select(x => x.Name).First();
                 _info.Remark = _header.Remark;
+                _info.Delivered = _header.Delivered;
                 _info.IsCOD = _header.CashOnDelivery;
                 _info.IsAccountTransfer = _header.AccountTransfer;
                 _info.TransferInfo = _header.TransferInformation;
@@ -123,6 +125,7 @@ namespace InventoryControl.Server.Controllers
                         CashOnDelivery = info.IsCOD,
                         AccountTransfer = info.IsAccountTransfer,
                         TransferInformation = info.TransferInfo,
+                        Delivered = info.Delivered,
                         Remark = info.Remark,
                         IsActive = true,
                         CreatedDate = DateTime.Now

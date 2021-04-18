@@ -40,6 +40,7 @@ namespace InventoryControl.Server.Controllers
                     OrderDate = x.CreatedDate,
                     Remark = x.Remark,
                     WaitingDays = x.WaitingDay,
+                    SoldOut = x.SoldOut,
                     CustomerId = x.CustomerId,
                     CustomerName = _dbContext.Customers.Where(y => y.Id == x.CustomerId).Select(y => y.Name).First()
                 };
@@ -62,6 +63,7 @@ namespace InventoryControl.Server.Controllers
                 _info.Code = _product.Code;
                 _info.Remark = _product.Remark;
                 _info.Deposit = _product.Deposit;
+                _info.SoldOut = _product.SoldOut;
                 _info.OrderDate = _product.CreatedDate;
                 _info.WaitingDays = _product.WaitingDay;
                 _info.CustomerId = _product.CustomerId;
@@ -112,6 +114,7 @@ namespace InventoryControl.Server.Controllers
                         CustomerId = info.CustomerId,
                         WaitingDay = info.WaitingDays,
                         Deposit = info.Deposit,
+                        SoldOut = info.SoldOut,
                         Remark = info.Remark,
                         IsActive = true,
                         CreatedDate = DateTime.Now
@@ -163,6 +166,7 @@ namespace InventoryControl.Server.Controllers
                     _header.CustomerId = info.CustomerId;
                     _header.Deposit = info.Deposit;
                     _header.WaitingDay = info.WaitingDays;
+                    _header.SoldOut = info.SoldOut;
                     _header.Remark = info.Remark;
                     _header.UpdatedDate = DateTime.Now;
                     _dbContext.SaveChanges();

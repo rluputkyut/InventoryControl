@@ -18,6 +18,7 @@ namespace InventoryControl.Server.Models
         public decimal Deposit { get; set; }
         public int CustomerId { get; set; }
         public string Remark { get; set; }
+        public bool SoldOut { get; set; }
         public DateTime CreatedDate { get; set; }
         public bool IsActive { get; set; }
         public DateTime? UpdatedDate { get; set; }

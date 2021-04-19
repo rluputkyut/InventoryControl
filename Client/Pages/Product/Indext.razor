@@ -1,5 +1,7 @@
 ﻿@page "/Product/index"
 @using InventoryControl.Shared
+@using InventoryControl.Client.Components
+@using InventoryControl.Shared.RequestFeatures
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -57,62 +59,82 @@ else
             </tbody>
         </table>
     </div>
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
 }
 
-        @code {
-
+@code {
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters();
     private List<ProductInfo> products;
-        public bool Show { get; set; } = false;
-        int _tempId = 0;
+    public bool Show { get; set; } = false;
+    int _tempId = 0;
 
-        void OnAddNew()
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/Product/Add");
+    }
+
+    void OnEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/Product/Edit/{id}");
+    }
+
+    async void OnDelete(ProductInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the product '{info.Name}'?"))
+            return;
+
+        Show = false;
+        var result = await Http.DeleteAsync("api/product/delete/" + info.Id);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        await GetData(_pageParameters);
+
+        StateHasChanged();
+    }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    products = await Http.GetFromJsonAsync<List<ProductInfo>>("api/product/get");
+    //}
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
         {
-            NavigationManager.NavigateTo("/Product/Add");
-        }
-
-        void OnEdit(int id)
-        {
-            NavigationManager.NavigateTo($"/Product/Edit/{id}");
-        }
-
-        async void OnDelete(ProductInfo info)
-        {
-            if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the product '{info.Name}'?"))
-                return;
-
-            Show = false;
-            var result = await Http.DeleteAsync("api/product/delete/" + info.Id);
-
-            if (result.IsSuccessStatusCode)
-                await LoadForm();
-        }
-
-        private async Task LoadForm()
-        {
-            await Task.Delay(500);
-
-            products = await Http.GetFromJsonAsync<List<ProductInfo>>("api/product/get");
+            await LoadForm();
 
             StateHasChanged();
         }
 
-        //protected override async Task OnInitializedAsync()
-        //{
-        //    products = await Http.GetFromJsonAsync<List<ProductInfo>>("api/product/get");
-        //}
+        await base.OnAfterRenderAsync(firstRender);
+    }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+    async Task GetData(PageParameters parameters)
+    {
+        var response = await Http.GetFromJsonAsync<ProductList>($"api/product/getbypage?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
 
-            if (firstRender)
-            {
-                await LoadForm();
+        products = response.Items;
+        MetaData = response.Meta;
+    }
 
-                StateHasChanged();
-            }
-
-            await base.OnAfterRenderAsync(firstRender);
-        }
-
-        }
+}

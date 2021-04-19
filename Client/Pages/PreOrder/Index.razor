@@ -1,5 +1,7 @@
 ﻿@page "/PreOrder/Index"
 @using InventoryControl.Shared
+@using InventoryControl.Client.Components
+@using InventoryControl.Shared.RequestFeatures
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -48,11 +50,16 @@ else
             }
         </tbody>
     </table>
-
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
 }
 
 @code {
-
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters();
     private List<PreOrderHeaderInfo> orders;
 
     void OnAddNew()
@@ -70,6 +77,12 @@ else
         NavigationManager.NavigateTo($"/PreOrder/Details/{id}");
     }
 
+    private async Task SelectedPage(int page)
+    {
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
+    }
+
     async void OnDelete(PreOrderHeaderInfo info)
     {
         if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the PerOrder Info '{info.Code}'?"))
@@ -85,14 +98,14 @@ else
     {
         await Task.Delay(500);
 
-        orders = await Http.GetFromJsonAsync<List<PreOrderHeaderInfo>>("api/preorder/getheaders");
+        await GetData(_pageParameters);
 
         StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await Http.GetFromJsonAsync<List<PreOrderHeaderInfo>>("api/preorder/getheaders");
+        await GetData(_pageParameters);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -107,6 +120,14 @@ else
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task GetData(PageParameters parameters)
+    {
+        var response = await Http.GetFromJsonAsync<PreOrderHeaderList>($"api/preorder/getheaders?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+
+        orders = response.Items;
+        MetaData = response.Meta;
     }
 
 }

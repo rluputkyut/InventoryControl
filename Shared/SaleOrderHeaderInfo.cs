@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InventoryControl.Shared.RequestFeatures;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace InventoryControl.Shared
 {
+    public class SaleOrderHeaderList
+    {
+        public List<SaleOrderHeaderInfo> Items { get; set; }
+        public MetaData Meta { get; set; }
+    }
     public class SaleOrderHeaderInfo
     {
         public int Id { get; set; }

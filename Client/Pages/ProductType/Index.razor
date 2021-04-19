@@ -1,5 +1,7 @@
 ﻿@page "/ProductType/index"
 @using InventoryControl.Shared
+@using InventoryControl.Client.Components
+@using InventoryControl.Shared.RequestFeatures
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -39,11 +41,16 @@ else
             }
         </tbody>
     </table>
-
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
 }
 
 @code {
-
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters();
     private List<ProductTypeInfo> productTypes;
     public bool Show { get; set; } = false;
     int _tempId = 0;
@@ -74,15 +81,21 @@ else
     {
         await Task.Delay(500);
 
-        productTypes = await Http.GetFromJsonAsync<List<ProductTypeInfo>>("api/producttype/get");
+        await GetData(_pageParameters);
 
         StateHasChanged();
     }
 
-    protected override async Task OnInitializedAsync()
+    private async Task SelectedPage(int page)
     {
-        productTypes = await Http.GetFromJsonAsync<List<ProductTypeInfo>>("api/producttype/get");
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
     }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    productTypes = await Http.GetFromJsonAsync<List<ProductTypeInfo>>("api/producttype/get");
+    //}
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -96,6 +109,14 @@ else
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task GetData(PageParameters parameters)
+    {
+        var response = await Http.GetFromJsonAsync<ProductTypeList>($"api/producttype/getbypage?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+
+        productTypes = response.Items;
+        MetaData = response.Meta;
     }
 
 }

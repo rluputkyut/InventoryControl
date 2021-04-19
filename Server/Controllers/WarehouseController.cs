@@ -13,10 +13,10 @@ namespace InventoryControl.Server.Controllers
     [Route("api/warehouse")]
     public class WarehouseController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<WarehouseController> _logger;
         InventoryControlContext _dbContext;
 
-        public WarehouseController(ILogger<WeatherForecastController> logger, InventoryControlContext inventoryControlContext)
+        public WarehouseController(ILogger<WarehouseController> logger, InventoryControlContext inventoryControlContext)
         {
             _logger = logger;
             _dbContext = inventoryControlContext;

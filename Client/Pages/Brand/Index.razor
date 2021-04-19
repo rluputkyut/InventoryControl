@@ -1,5 +1,4 @@
 @page "/Brand/index"
-@using InventoryControl.Client.Features
 @using InventoryControl.Client.Components
 @using InventoryControl.Shared
 @using InventoryControl.Shared.RequestFeatures
@@ -21,7 +20,7 @@ else
     </p>
 
     <div class="row col-12">
-        <table class="table">
+        <table class="table table-bordered table-striped mb-0">
             <thead>
                 <tr>
                     <th>Code</th>
@@ -110,7 +109,7 @@ else
     {
         await Task.Delay(500);
 
-        await GetBrands(_pageParameters);
+        await GetData(_pageParameters);
 
         StateHasChanged();
     }
@@ -118,13 +117,13 @@ else
     private async Task SelectedPage(int page)
     {
         _pageParameters.PageNumber = page;
-        await GetBrands(_pageParameters);
+        await GetData(_pageParameters);
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await GetBrands(_pageParameters);
-    }
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    await GetData(_pageParameters);
+    //}
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -141,22 +140,11 @@ else
     }
 
 
-    async Task GetBrands(PageParameters parameters)
+    async Task GetData(PageParameters parameters)
     {
-        //var queryStringParam = new Dictionary<string, string>
-        //{
-        //    ["pageNumber"] = productParameters.PageNumber.ToString()
-        //};
-        //var response = await _client.GetAsync(QueryHelpers.AddQueryString("https://localhost:5011/api/products", queryStringParam));
-        var response = await Http.GetFromJsonAsync<List<BrandInfo>>($"api/brand/get?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+        var response = await Http.GetFromJsonAsync<BrandList>($"api/brand/getbypage?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
 
-        brands = response;
-        MetaData = new MetaData()
-        {
-            CurrentPage = response[0].CurrentPage,
-            PageSize = response[0].PageSize,
-            TotalCount = response[0].TotalCount,
-            TotalPages = response[0].TotalPages
-        };
+        brands = response.Items;
+        MetaData = response.Meta;
     }
 }

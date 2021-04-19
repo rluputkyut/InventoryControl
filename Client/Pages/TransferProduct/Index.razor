@@ -1,5 +1,7 @@
 ﻿@page "/TransferProduct/index"
 @using InventoryControl.Shared
+@using InventoryControl.Client.Components
+@using InventoryControl.Shared.RequestFeatures
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -32,27 +34,32 @@ else
         <tbody>
             @foreach (var info in tansferProducts)
             {
-            <tr>
-                <td>@info.Code</td>
-                <td>@info.TransferDate</td>
-                <td>@info.FromWarehouseName</td>
-                <td>@info.ToWarehouseName</td>
-                <td>@String.Format("{0:0.00}", info.Cost)</td>
-                <td>@info.Remark</td>
-                <td>
-                    @*<a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |*@
-                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
-                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
-                </td>
-            </tr>
+                <tr>
+                    <td>@info.Code</td>
+                    <td>@info.TransferDate</td>
+                    <td>@info.FromWarehouseName</td>
+                    <td>@info.ToWarehouseName</td>
+                    <td>@String.Format("{0:0.00}", info.Cost)</td>
+                    <td>@info.Remark</td>
+                    <td>
+                        @*<a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |*@
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
-
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
 }
 
 @code {
-
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters();
     private List<TransferProductHeaderInfo> tansferProducts;
     public bool Show { get; set; } = false;
     int _tempId = 0;
@@ -88,15 +95,21 @@ else
     {
         await Task.Delay(500);
 
-        tansferProducts = await Http.GetFromJsonAsync<List<TransferProductHeaderInfo>>("api/transferproduct/getheaders");
+        await GetData(_pageParameters);
 
         StateHasChanged();
     }
 
-    protected override async Task OnInitializedAsync()
+    private async Task SelectedPage(int page)
     {
-        tansferProducts = await Http.GetFromJsonAsync<List<TransferProductHeaderInfo>>("api/transferproduct/getheaders");
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
     }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    tansferProducts = await Http.GetFromJsonAsync<List<TransferProductHeaderInfo>>("api/transferproduct/getheaders");
+    //}
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -112,4 +125,11 @@ else
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    async Task GetData(PageParameters parameters)
+    {
+        var response = await Http.GetFromJsonAsync<TransferProductHeaderList>($"api/transferproduct/getheaders?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+
+        tansferProducts = response.Items;
+        MetaData = response.Meta;
+    }
 }

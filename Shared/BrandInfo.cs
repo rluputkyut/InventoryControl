@@ -8,7 +8,13 @@ using System.Threading.Tasks;
 
 namespace InventoryControl.Shared
 {
-    public class BrandInfo: MetaData
+    public class BrandList
+    {
+        public List<BrandInfo> Items { get; set; }
+        public MetaData Meta { get; set; }
+    }
+
+    public class BrandInfo
     {
         public int Id { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using InventoryControl.Server.Models;
 using InventoryControl.Shared;
+using InventoryControl.Shared.RequestFeatures;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,10 +14,10 @@ namespace InventoryControl.Server.Controllers
     [Route("api/transferproduct")]
     public class TransferProductController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<TransferProductController> _logger;
         InventoryControlContext _dbContext;
 
-        public TransferProductController(ILogger<WeatherForecastController> logger, InventoryControlContext inventoryControlContext)
+        public TransferProductController(ILogger<TransferProductController> logger, InventoryControlContext inventoryControlContext)
         {
             _logger = logger;
             _dbContext = inventoryControlContext;
@@ -24,10 +25,10 @@ namespace InventoryControl.Server.Controllers
 
         [HttpGet]
         [Route("getheaders")]
-        public List<TransferProductHeaderInfo> GetHeaders()
+        public TransferProductHeaderList GetHeaders([FromQuery] PageParameters parameters)
         {
             List<TransferProductHeaderInfo> _list = new List<TransferProductHeaderInfo>();
-            var _products = _dbContext.TransferProductHeaders.Where(x => x.IsActive).ToList();
+            var _products = _dbContext.TransferProductHeaders.Where(x => x.IsActive).OrderByDescending(x=>x.Id).ToList();
             var _warehouses = _dbContext.Warehouses.ToList();
 
             _products.ForEach(x =>
@@ -47,7 +48,9 @@ namespace InventoryControl.Server.Controllers
                 _list.Add(_info);
             });
 
-            return _list;
+            var response = PagedList<TransferProductHeaderInfo>.ToPagedList(_list, parameters.PageNumber, parameters.PageSize);
+            return new TransferProductHeaderList() { Items = response.ToList(), Meta = response.MetaData };
+            //return _list;
         }
 
         [HttpGet]

@@ -1,5 +1,7 @@
 ﻿@page "/SaleOrder/Index"
 @using InventoryControl.Shared
+@using InventoryControl.Client.Components
+@using InventoryControl.Shared.RequestFeatures
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -32,26 +34,31 @@ else
         <tbody>
             @foreach (var info in orders)
             {
-            <tr>
-                <td>@info.Code</td>
-                <td>@info.SellingDate</td>
-                <td>@info.WarehouseName</td>
-                <td>@info.CustomerName</td>
-                @*<td>@(info.IsCOD? "Cash On Delivery" : $"Account Info:{info.TransferInfo}" )</td>*@
-                <td>@info.Remark</td>
-                <td>
-                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
-                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
-                </td>
-            </tr>
+                <tr>
+                    <td>@info.Code</td>
+                    <td>@info.SellingDate</td>
+                    <td>@info.WarehouseName</td>
+                    <td>@info.CustomerName</td>
+                    @*<td>@(info.IsCOD? "Cash On Delivery" : $"Account Info:{info.TransferInfo}" )</td>*@
+                    <td>@info.Remark</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
-
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
 }
 
 @code {
-
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters();
     private List<SaleOrderHeaderInfo> orders;
 
     void OnAddNew()
@@ -79,15 +86,21 @@ else
     {
         await Task.Delay(500);
 
-        orders = await Http.GetFromJsonAsync<List<SaleOrderHeaderInfo>>("api/saleorder/getheaders");
+        await GetData(_pageParameters);
 
         StateHasChanged();
     }
 
-    protected override async Task OnInitializedAsync()
+    private async Task SelectedPage(int page)
     {
-        orders = await Http.GetFromJsonAsync<List<SaleOrderHeaderInfo>>("api/saleorder/getheaders");
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
     }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    orders = await Http.GetFromJsonAsync<List<SaleOrderHeaderInfo>>("api/saleorder/getheaders");
+    //}
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -101,6 +114,14 @@ else
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task GetData(PageParameters parameters)
+    {
+        var response = await Http.GetFromJsonAsync<SaleOrderHeaderList>($"api/saleorder/getheaders?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+
+        orders = response.Items;
+        MetaData = response.Meta;
     }
 
 }

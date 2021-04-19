@@ -1,5 +1,6 @@
 ﻿using InventoryControl.Server.Models;
 using InventoryControl.Shared;
+using InventoryControl.Shared.RequestFeatures;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,10 +14,10 @@ namespace InventoryControl.Server.Controllers
     [Route("api/saleorder")]
     public class SaleOrderController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<SaleOrderController> _logger;
         InventoryControlContext _dbContext;
 
-        public SaleOrderController(ILogger<WeatherForecastController> logger, InventoryControlContext inventoryControlContext)
+        public SaleOrderController(ILogger<SaleOrderController> logger, InventoryControlContext inventoryControlContext)
         {
             _logger = logger;
             _dbContext = inventoryControlContext;
@@ -24,10 +25,10 @@ namespace InventoryControl.Server.Controllers
 
         [HttpGet]
         [Route("getheaders")]
-        public List<SaleOrderHeaderInfo> GetHeaders()
+        public SaleOrderHeaderList GetHeaders([FromQuery] PageParameters parameters)
         {
             List<SaleOrderHeaderInfo> _list = new List<SaleOrderHeaderInfo>();
-            var _headers = _dbContext.SaleOrderHeaders.Where(x => x.IsActive).ToList();
+            var _headers = _dbContext.SaleOrderHeaders.Where(x => x.IsActive).OrderByDescending(x=>x.Id).ToList();
             var _customers = _dbContext.Customers.ToList();
             var _warehouses = _dbContext.Warehouses.ToList();
 
@@ -51,7 +52,9 @@ namespace InventoryControl.Server.Controllers
                 _list.Add(_info);
             });
 
-            return _list;
+            var response = PagedList<SaleOrderHeaderInfo>.ToPagedList(_list, parameters.PageNumber, parameters.PageSize);
+            return new SaleOrderHeaderList() { Items = response.ToList(), Meta = response.MetaData };
+            //return _list;
         }
 
         [HttpGet]

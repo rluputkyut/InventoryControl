@@ -14,10 +14,10 @@ namespace InventoryControl.Server.Controllers
     [Route("api/brand")]
     public class BrandController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<BrandController> _logger;
         InventoryControlContext _dbContext;
 
-        public BrandController(ILogger<WeatherForecastController> logger, InventoryControlContext inventoryControlContext)
+        public BrandController(ILogger<BrandController> logger, InventoryControlContext inventoryControlContext)
         {
             _logger = logger;
             _dbContext = inventoryControlContext;
@@ -25,7 +25,7 @@ namespace InventoryControl.Server.Controllers
 
         [HttpGet]
         [Route("get")]
-        public List<BrandInfo> Get([FromQuery] PageParameters parameters)
+        public List<BrandInfo> Get()
         {
             List<BrandInfo> _brands = new List<BrandInfo>();
             var _brandList = _dbContext.Brands.Where(x=>x.IsActive).ToList();
@@ -40,16 +40,28 @@ namespace InventoryControl.Server.Controllers
                 _brands.Add(_info);
             });
 
-            var response = PagedList<BrandInfo>.ToPagedList(_brands, parameters.PageNumber, parameters.PageSize);
-            response.ForEach(x => 
+            return _brands;
+        }
+
+        [HttpGet]
+        [Route("getbypage")]
+        public BrandList GetByPage([FromQuery] PageParameters parameters)
+        {
+            List<BrandInfo> _brands = new List<BrandInfo>();
+            var _brandList = _dbContext.Brands.Where(x => x.IsActive).ToList();
+            _brandList.ForEach(x =>
             {
-                x.CurrentPage = response.MetaData.CurrentPage;
-                x.PageSize = response.MetaData.PageSize;
-                x.TotalCount = response.MetaData.TotalCount;
-                x.TotalPages = response.MetaData.TotalPages;
+                BrandInfo _info = new BrandInfo()
+                {
+                    Id = x.Id,
+                    Code = x.Code,
+                    Name = x.Name
+                };
+                _brands.Add(_info);
             });
 
-            return response.ToList();
+            var response = PagedList<BrandInfo>.ToPagedList(_brands, parameters.PageNumber, parameters.PageSize);
+            return new BrandList() { Items = response.ToList(), Meta = response.MetaData };
         }
 
         [HttpGet]

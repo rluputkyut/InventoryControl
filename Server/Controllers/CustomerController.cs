@@ -1,5 +1,6 @@
 ﻿using InventoryControl.Server.Models;
 using InventoryControl.Shared;
+using InventoryControl.Shared.RequestFeatures;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,10 +14,10 @@ namespace InventoryControl.Server.Controllers
     [Route("api/customer")]
     public class CustomerController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<CustomerController> _logger;
         InventoryControlContext _dbContext;
 
-        public CustomerController(ILogger<WeatherForecastController> logger, InventoryControlContext inventoryControlContext)
+        public CustomerController(ILogger<CustomerController> logger, InventoryControlContext inventoryControlContext)
         {
             _logger = logger;
             _dbContext = inventoryControlContext;
@@ -44,6 +45,32 @@ namespace InventoryControl.Server.Controllers
             });
 
             return _customers;
+        }
+
+        [HttpGet]
+        [Route("getbyPage")]
+        public CustomerList GetByPage([FromQuery] PageParameters parameters)
+        {
+            List<CustomerInfo> _customers = new List<CustomerInfo>();
+            var _list = _dbContext.Customers.Where(x => x.IsActive).ToList();
+            _list.ForEach(x =>
+            {
+                CustomerInfo _info = new CustomerInfo()
+                {
+                    Id = x.Id,
+                    Code = x.Code,
+                    Name = x.Name,
+                    NickName = x.NickName,
+                    AccountInformation = x.AccountInformation,
+                    PhoneNo = x.PhoneNo,
+                    Address = x.Address
+                };
+                _customers.Add(_info);
+            });
+
+            var response = PagedList<CustomerInfo>.ToPagedList(_customers, parameters.PageNumber, parameters.PageSize);
+            return new CustomerList() { Items = response.ToList(), Meta = response.MetaData };
+            //return _customers;
         }
 
         [HttpGet]

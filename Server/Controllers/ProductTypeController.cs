@@ -1,5 +1,6 @@
 ﻿using InventoryControl.Server.Models;
 using InventoryControl.Shared;
+using InventoryControl.Shared.RequestFeatures;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,10 +14,10 @@ namespace InventoryControl.Server.Controllers
     [Route("api/producttype")]
     public class ProductTypeController : Controller
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<ProductTypeController> _logger;
         InventoryControlContext _dbContext;
 
-        public ProductTypeController(ILogger<WeatherForecastController> logger, InventoryControlContext inventoryControlContext)
+        public ProductTypeController(ILogger<ProductTypeController> logger, InventoryControlContext inventoryControlContext)
         {
             _logger = logger;
             _dbContext = inventoryControlContext;
@@ -40,6 +41,28 @@ namespace InventoryControl.Server.Controllers
             });
 
             return _productTypes;
+        }
+
+        [HttpGet]
+        [Route("getbypage")]
+        public ProductTypeList GetbyPage([FromQuery] PageParameters parameters)
+        {
+            List<ProductTypeInfo> _productTypes = new List<ProductTypeInfo>();
+            var _list = _dbContext.ProductTypes.Where(x => x.IsActive).ToList();
+            _list.ForEach(x =>
+            {
+                ProductTypeInfo _info = new ProductTypeInfo()
+                {
+                    Id = x.Id,
+                    Code = x.Code,
+                    Name = x.Name
+                };
+                _productTypes.Add(_info);
+            });
+
+            var response = PagedList<ProductTypeInfo>.ToPagedList(_productTypes, parameters.PageNumber, parameters.PageSize);
+            return new ProductTypeList() { Items = response.ToList(), Meta = response.MetaData };
+            //return _productTypes;
         }
 
         [HttpGet]

@@ -1,5 +1,6 @@
 ﻿using InventoryControl.Server.Models;
 using InventoryControl.Shared;
+using InventoryControl.Shared.RequestFeatures;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,10 +14,10 @@ namespace InventoryControl.Server.Controllers
     [Route("api/product")]
     public class ProductController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<ProductController> _logger;
         InventoryControlContext _dbContext;
 
-        public ProductController(ILogger<WeatherForecastController> logger, InventoryControlContext inventoryControlContext)
+        public ProductController(ILogger<ProductController> logger, InventoryControlContext inventoryControlContext)
         {
             _logger = logger;
             _dbContext = inventoryControlContext;
@@ -51,6 +52,39 @@ namespace InventoryControl.Server.Controllers
             });
 
             return _products;
+        }
+
+        [HttpGet]
+        [Route("getbyPage")]
+        public ProductList GetByPage([FromQuery] PageParameters parameters)
+        {
+            List<ProductInfo> _products = new List<ProductInfo>();
+            var _productList = _dbContext.Products.Where(x => x.IsActive).ToList();
+
+            _productList.ForEach(x =>
+            {
+                ProductInfo _info = new ProductInfo()
+                {
+                    Id = x.Id,
+                    Code = x.Code,
+                    Name = x.Name,
+                    Description = x.Description,
+                    BrandId = x.BrandId,
+                    BrandName = _dbContext.Brands.Where(y => y.Id == x.BrandId).Select(y => y.Name).FirstOrDefault(),
+                    ProductTypeId = x.ProductTypeId,
+                    ProductTypeName = _dbContext.ProductTypes.Where(y => y.Id == x.ProductTypeId).Select(y => y.Name).FirstOrDefault(),
+                    Photo = x.Photo == null ? string.Empty : Convert.ToBase64String(x.Photo),
+                    Price = x.Price,
+                    Size = x.Size,
+                    ExpiredDate = x.ExpiredDate,
+                    ManufactureDate = x.ManufactureDate
+                };
+                _products.Add(_info);
+            });
+
+            var response = PagedList<ProductInfo>.ToPagedList(_products, parameters.PageNumber, parameters.PageSize);
+            return new ProductList() { Items = response.ToList(), Meta = response.MetaData };
+            //return _products;
         }
 
         [HttpGet]

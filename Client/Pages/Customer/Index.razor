@@ -1,5 +1,7 @@
 ﻿@page "/Customer/index"
 @using InventoryControl.Shared
+@using InventoryControl.Client.Components
+@using InventoryControl.Shared.RequestFeatures
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -32,26 +34,31 @@ else
         <tbody>
             @foreach (var info in customers)
             {
-            <tr>
-                <td>@info.Code</td>
-                <td>@info.Name</td>
-                <td>@info.NickName</td>
-                <td>@info.PhoneNo</td>
-                <td>@info.Address</td>
-                <td>@info.AccountInformation</td>
-                <td>
-                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
-                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
-                </td>
-            </tr>
+                <tr>
+                    <td>@info.Code</td>
+                    <td>@info.Name</td>
+                    <td>@info.NickName</td>
+                    <td>@info.PhoneNo</td>
+                    <td>@info.Address</td>
+                    <td>@info.AccountInformation</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
-
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
 }
 
 @code {
-
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters();
     private List<CustomerInfo> customers;
     public bool Show { get; set; } = false;
     int _tempId = 0;
@@ -66,6 +73,11 @@ else
         NavigationManager.NavigateTo($"/Customer/Edit/{id}");
     }
 
+    private async Task SelectedPage(int page)
+    {
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
+    }
 
     async void OnDelete(CustomerInfo info)
     {
@@ -83,7 +95,7 @@ else
     {
         await Task.Delay(500);
 
-        customers = await Http.GetFromJsonAsync<List<CustomerInfo>>("api/customer/get");
+        await GetData(_pageParameters);
 
         StateHasChanged();
     }
@@ -105,6 +117,14 @@ else
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task GetData(PageParameters parameters)
+    {
+        var response = await Http.GetFromJsonAsync<CustomerList>($"api/customer/getbypage?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+
+        customers = response.Items;
+        MetaData = response.Meta;
     }
 
 }

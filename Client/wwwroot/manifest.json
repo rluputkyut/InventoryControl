@@ -1,6 +1,6 @@
 {
-  "name": "InventoryControl",
-  "short_name": "InventoryControl",
+  "name": "Child Lay Inventory",
+  "short_name": "ChildlayInventory",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -1,7 +1,30 @@
 ﻿@page "/"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using InventoryControl.Client.Services
+@using InventoryControl.Shared.RequestFeatures
+@inject ILocalStorageService LocalStorageService
+@inject NavigationManager NavigationManager
 
-<h1>Hello,</h1>
+@if (user != null)
+{
+    <h1>Hello, @user.UserName</h1>
 
-Welcome to Child Lay Inventory.
+    <p>Welcome to Child Lay Inventory.</p>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+}
+else
+{
+    <p>Loading...</p>
+}
+@code {
+    private User user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await LocalStorageService.GetItem<User>("user");
+
+        if (user == null)
+            NavigationManager.NavigateTo("Login");
+}
+}

@@ -1,5 +1,7 @@
 ﻿@page "/Warehouse/Details/{id:int}"
 @using InventoryControl.Shared
+@using InventoryControl.Client.Components
+@using InventoryControl.Shared.RequestFeatures
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -55,6 +57,7 @@ else
             <div class="col-md-12 text-right">
                 <button type="submit" class="btn btn-primary">@_btnName</button>
                 <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+                <button type="button" class="btn btn-secondary" @onclick="OnBack">Back</button>
             </div>
         </div>
     </EditForm>
@@ -85,6 +88,11 @@ else
             </tbody>
         </table>
     </div>
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
 }
 <br />
 
@@ -93,7 +101,8 @@ else
 
     [Parameter]
     public int id { get; set; }
-
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters() { PageSize = 5};
     private WarehouseInfo warehouse;
     private List<ProductInfo> products;
     private WarehouseProductInfo wProduct;
@@ -113,7 +122,8 @@ else
         if (id > 0)
         {
             warehouse = await Http.GetFromJsonAsync<WarehouseInfo>($"api/warehouse/getbyid/{id}");
-            wProducts = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{id}");
+            //wProducts = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{id}");
+            await GetData(_pageParameters);
         }
     }
 
@@ -122,6 +132,17 @@ else
         _btnName = "Save";
         wProduct = new WarehouseProductInfo();
         wProduct.WarehouseId = id;
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
+    }
+
+    void OnBack()
+    {
+        NavigationManager.NavigateTo("/Warehouse/Index");
     }
 
     void OnEdit(int id)
@@ -145,8 +166,8 @@ else
     private async Task LoadForm()
     {
         await Task.Delay(500);
-
-        wProducts = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{id}");
+        await GetData(_pageParameters);
+        //wProducts = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{id}");
         OnCancel();
 
         StateHasChanged();
@@ -162,5 +183,13 @@ else
 
         //NavigationManager.NavigateTo("/Warehouse/Index");
         await LoadForm();
+    }
+
+    async Task GetData(PageParameters parameters)
+    {
+        var response = await Http.GetFromJsonAsync<WarehouseProductList>($"api/warehouseproducts/getbywarehouseid/{id}/{parameters.PageNumber}/{parameters.PageSize}");
+
+        wProducts = response.Items;
+        MetaData = response.Meta;
     }
 }

@@ -42,7 +42,7 @@ else
                         }
                         else
                         {
-                            <td><img class="rounded m-0" src="@string.Format($"data:png;base64,{info.Photo}")" /></td>
+                            <td><img class="rounded m-0 h-50" src="@string.Format($"data:png;base64,{info.Photo}")" /></td>
                         }
                         <td>@info.Code</td>
                         <td>@info.Name</td>
@@ -68,7 +68,7 @@ else
 
 @code {
     public MetaData MetaData { get; set; } = new MetaData();
-    private PageParameters _pageParameters = new PageParameters();
+    private PageParameters _pageParameters = new PageParameters() { PageSize = 4};
     private List<ProductInfo> products;
     public bool Show { get; set; } = false;
     int _tempId = 0;

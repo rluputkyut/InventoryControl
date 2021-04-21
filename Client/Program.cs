@@ -1,3 +1,4 @@
+using InventoryControl.Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,10 +18,19 @@ namespace InventoryControl.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
 
+            builder.Services
+               .AddScoped<IAuthenticationService, AuthenticationService>()
+               .AddScoped<ILocalStorageService, LocalStorageService>();
+
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-            
-            await builder.Build().RunAsync();
+            var host = builder.Build();
+
+            var authenticationService = host.Services.GetRequiredService<IAuthenticationService>();
+            await authenticationService.Initialize();
+
+            await host.RunAsync();
+            //await builder.Build().RunAsync();
         }
     }
 }

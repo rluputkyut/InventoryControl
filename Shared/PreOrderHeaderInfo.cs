@@ -25,7 +25,7 @@ namespace InventoryControl.Shared
         public int CustomerId { get; set; }
         public string CustomerName { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "Invalid Deposit!")]
+        [Range(0, int.MaxValue, ErrorMessage = "Invalid Deposit!")]
         public decimal Deposit { get; set; }
         public string Remark { get; set; }
 
@@ -47,6 +47,7 @@ namespace InventoryControl.Shared
         public int ProductId { get; set; }
         public string ProductCode { get; set; }
         public string ProductName { get; set; }
+        public decimal ProductPrice { get; set; }
 
         [Required(ErrorMessage = "Qiantity is Required!")]
         public int Quantity { get; set; }

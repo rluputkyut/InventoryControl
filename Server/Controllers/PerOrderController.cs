@@ -85,12 +85,16 @@ namespace InventoryControl.Server.Controllers
 
             _products.ForEach(x =>
             {
+                var _item = _dbContext.Products.Where(z => z.Id == x.ProductId).FirstOrDefault();
+
                 PreOrderItemInfo _info = new PreOrderItemInfo()
                 {
                     Id = x.Id,
                     HeaderId = x.HeaderId,
                     ProductId = x.ProductId,
-                    ProductName = _dbContext.Products.Where(z => z.Id == x.ProductId).Select(z => z.Name).FirstOrDefault(),
+                    ProductName = _item.Name,
+                    ProductCode = _item.Code,
+                    ProductPrice = _item.Price is null? 0 : (decimal) _item.Price,
                     Quantity = x.Quantity,
                 };
                 _list.Add(_info);

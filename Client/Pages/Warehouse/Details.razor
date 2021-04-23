@@ -35,22 +35,22 @@ else
             <div>
                 <InputSelect id="ProductId" class="form-control" @bind-Value="wProduct.ProductId">
                     @if (products != null)
-                        {
+                    {
                         <option value="0">Select</option>
                         @foreach (var info in products)
-                            {
+                        {
                             <option value="@info.Id">@info.Name</option>
-                            }
                         }
+                    }
                 </InputSelect>
-                <ValidationMessage For="@(()=> wProduct.ProductId)" />
+                <ValidationMessage For="@(() => wProduct.ProductId)" />
             </div>
         </div>
         <div class="col-12 row mt-2">
             <label for="Size" class="col-md-2 col-form-label">Quantity:</label>
             <div>
                 <InputNumber id="Size" class="form-control" @bind-Value="wProduct.Quantity" />
-                <ValidationMessage For="@(()=> wProduct.Quantity)" />
+                <ValidationMessage For="@(() => wProduct.Quantity)" />
             </div>
         </div>
         <div class="row mt-2">
@@ -68,6 +68,7 @@ else
                 <tr>
                     <th>Product Code</th>
                     <th>Product Name</th>
+                    <th>Price</th>
                     <th>Quantity</th>
                     <th></th>
                 </tr>
@@ -78,6 +79,7 @@ else
                     <tr>
                         <td>@info.ProductCode</td>
                         <td>@info.ProductName</td>
+                        <td>@products.Where(x => x.Id == info.ProductId).Select(x => x.Price).FirstOrDefault()</td>
                         <td>@info.Quantity</td>
                         <td>
                             <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
@@ -88,7 +90,21 @@ else
             </tbody>
         </table>
     </div>
-    <div class="row">
+    <div class="col-12 row mt-2">
+        <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
+        <div>
+            <label class="form-control">@{String.Format("{0:0.00}", products.Join(wProducts,
+pd => pd.Id,
+wp => wp.ProductId,
+(pro, warPro) => new { pro.Price, warPro.Quantity }).Sum(x => x.Quantity * x.Price)
+);}
+            </label>
+
+</div>
+
+</div>
+
+<div class="row">
         <div class="col">
             <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
         </div>
@@ -102,7 +118,7 @@ else
     [Parameter]
     public int id { get; set; }
     public MetaData MetaData { get; set; } = new MetaData();
-    private PageParameters _pageParameters = new PageParameters() { PageSize = 5};
+    private PageParameters _pageParameters = new PageParameters() { PageSize = 5 };
     private WarehouseInfo warehouse;
     private List<ProductInfo> products;
     private WarehouseProductInfo wProduct;

@@ -25,9 +25,7 @@ namespace InventoryControl.Shared
         [Range(1, int.MaxValue, ErrorMessage = "Product is Required!")]
         public int ProductId { get; set; }
         public string ProductName { get; set; }
-
-        public string ProductCode { get; set; }
-
+        public string ProductCode { get; set; }        
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Quantity is Required!")]
         public int Quantity { get; set; }

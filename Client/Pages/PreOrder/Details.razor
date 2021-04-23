@@ -17,7 +17,6 @@ else
             <dt>
                 Code:
             </dt>
-
             <dd>
                 @headerOrder.Code
             </dd>
@@ -25,7 +24,6 @@ else
             <dt>
                 Ordered Date:
             </dt>
-
             <dd>
                 @headerOrder.OrderDate
             </dd>
@@ -33,7 +31,6 @@ else
             <dt>
                 Customer:
             </dt>
-
             <dd>
                 @headerOrder.CustomerName
             </dd>
@@ -41,7 +38,6 @@ else
             <dt>
                 Waiting Days:
             </dt>
-
             <dd>
                 @headerOrder.WaitingDays
             </dd>
@@ -49,7 +45,6 @@ else
             <dt>
                 Deposit:
             </dt>
-
             <dd>
                 @String.Format("{0:0.00}", headerOrder.Deposit)
             </dd>
@@ -57,9 +52,15 @@ else
             <dt>
                 Remark:
             </dt>
-
             <dd>
                 @headerOrder.Remark
+            </dd>
+
+            <dt>
+                Total Amount:
+            </dt>
+            <dd>
+                @String.Format("{0:0.00}", headerOrder.Items.Sum(x => x.ProductPrice * x.Quantity))
             </dd>
         </dl>
 
@@ -69,20 +70,26 @@ else
                     Product
                 </th>
                 <th>
+                    Price
+                </th>
+                <th>
                     Quantity
                 </th>
             </tr>
 
             @foreach (var item in headerOrder.Items)
             {
-                <tr>
-                    <td>
-                        @item.ProductName
-                    </td>
-                    <td>
-                        @item.Quantity
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    @item.ProductName
+                </td>
+                <td>
+                    @item.ProductPrice
+                </td>
+                <td>
+                    @item.Quantity
+                </td>
+            </tr>
             }
 
         </table>

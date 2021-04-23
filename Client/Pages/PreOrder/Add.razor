@@ -29,7 +29,7 @@ else
             <InputSelect id="CustomerId" class="form-control" @bind-Value="headerInfo.CustomerId">
                 @if (customers != null)
                     {
-                        <option value="0">Select</option>
+                    <option value="0">Select</option>
                     @foreach (var info in customers)
                         {
                         <option value="@info.Id">@info.Name</option>
@@ -67,7 +67,7 @@ else
             <InputSelect id="ProductId" class="form-control" @bind-Value="itemInfo.ProductId">
                 @if (products != null)
                     {
-                        <option value="0">Select</option>
+                    <option value="0">Select</option>
                     @foreach (var product in products)
                         {
                         <option value="@product.Id">@product.Name</option>
@@ -90,6 +90,7 @@ else
             <thead>
                 <tr>
                     <th>Product</th>
+                    <th>Price</th>
                     <th>Quantity</th>
                     <th></th>
                 </tr>
@@ -97,20 +98,26 @@ else
             <tbody>
                 @foreach (var info in headerInfo.Items)
                 {
-                    <tr>
-                        <td>@info.ProductName</td>
-                        <td>@info.Quantity</td>
-                        <td>
-                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEditItem(info.Id))">Edit</a> |
-                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDeleteItem(info.Id))">Delete</a> |
-                        </td>
-                    </tr>
+                <tr>
+                    <td>@info.ProductName</td>
+                    <td>@info.ProductPrice</td>
+                    <td>@info.Quantity</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEditItem(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDeleteItem(info.Id))">Delete</a> |
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>
         <ValidationMessage For="@(()=> headerInfo.Items)" />
     </div>
-
+    <div class="col-12 row mt-2">
+        <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
+        <div>
+            <label class="form-control">@String.Format("{0:0.00}", headerInfo.Items.Sum(x => x.ProductPrice * x.Quantity))</label>
+        </div>
+    </div>
     <div class="row mt-2">
         <div class="col-md-12 text-right">
             <button type="submit" class="btn btn-success">Save</button>
@@ -187,12 +194,15 @@ else
             item.ProductId = itemInfo.ProductId;
             item.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
             item.Quantity = itemInfo.Quantity;
+            item.ProductPrice = itemInfo.ProductPrice;
         }
         else
         {
             itemInfo.Id = GenerateId();
             itemInfo.HeaderId = id;
-            itemInfo.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
+            var _product = products.Where(x => x.Id == itemInfo.ProductId).FirstOrDefault();
+            itemInfo.ProductName = _product.Name;
+            itemInfo.ProductPrice = _product.Price is null? 0 : (decimal)_product.Price;
             headerInfo.Items.Add(itemInfo);
         }
 
@@ -214,6 +224,7 @@ else
         itemInfo.ProductId = item.ProductId;
         itemInfo.ProductName = item.ProductName;
         itemInfo.Quantity = item.Quantity;
+        itemInfo.ProductPrice = item.ProductPrice;
 
         isItemEdit = true;
     }

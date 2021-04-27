@@ -57,6 +57,18 @@ else
             </dd>
 
             <dt>
+                Status:
+            </dt>
+            @if (headerOrder.SoldOut)
+            {
+                <dd>Sold</dd>
+            }
+            else
+            {
+                <dd>Pending</dd>
+            }
+
+            <dt>
                 Total Amount:
             </dt>
             <dd>

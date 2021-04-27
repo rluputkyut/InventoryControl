@@ -23,7 +23,7 @@ else
             <thead>
                 <tr>
                     <th></th>
-                    <th>Code</th>
+                    <th><div>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></div></th>
                     <th>Name</th>
                     <th>BrandName</th>
                     <th>ProductTypeName</th>
@@ -108,6 +108,11 @@ else
         await GetData(_pageParameters);
 
         StateHasChanged();
+    }
+
+    void OnSearchTextChanged(ChangeEventArgs changeEventArgs, string columnTitle)
+    { 
+        
     }
 
     //protected override async Task OnInitializedAsync()

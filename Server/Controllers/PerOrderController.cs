@@ -209,6 +209,24 @@ namespace InventoryControl.Server.Controllers
             return _id;
         }
 
+        [HttpGet]
+        [Route("updatestatus/{id}/{soldOut}")]
+        public int UpdateStatus(int id, bool soldOut)
+        {
+            int _id = 0;
+
+            if (_dbContext.PreOrderHeaders.Where(x => x.Id ==id && x.IsActive).Any())
+            {
+                var _header = _dbContext.PreOrderHeaders.Where(x => x.Id ==id && x.IsActive).First();
+                _id = _header.Id;
+                _header.SoldOut =soldOut;
+                _header.UpdatedDate = DateTime.Now;
+                _dbContext.SaveChanges();
+            }
+
+            return _id;
+        }
+
         [HttpDelete]
         [Route("delete/{id}")]
         public bool Delete(int id)

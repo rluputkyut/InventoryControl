@@ -42,6 +42,7 @@ else
                     @*<td>@(info.IsCOD? "Cash On Delivery" : $"Account Info:{info.TransferInfo}" )</td>*@
                     <td>@info.Remark</td>
                     <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnChangeStatus(info))">ChangeStatus</a> |
                         <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
                         <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
                     </td>
@@ -101,6 +102,21 @@ else
     //{
     //    orders = await Http.GetFromJsonAsync<List<SaleOrderHeaderInfo>>("api/saleorder/getheaders");
     //}
+
+    async void OnChangeStatus(SaleOrderHeaderInfo info)
+    {
+        var _status = info.Delivered ? "Pending" : "Delivered";
+
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to change the Status to '{_status}' for {info.Code}?"))
+            return;
+
+        info.Delivered = !info.Delivered;
+
+        var result = await Http.GetFromJsonAsync<int>($"api/saleorder/updatestatus/{info.Id}/{info.Delivered}");
+
+        if (result > 0)
+            await LoadForm();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

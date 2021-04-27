@@ -79,7 +79,7 @@ else
                     <tr>
                         <td>@info.ProductCode</td>
                         <td>@info.ProductName</td>
-                        <td>@products.Where(x => x.Id == info.ProductId).Select(x => x.Price).FirstOrDefault()</td>
+                        <td>@String.Format("{0:0.00}", info.Price)</td>
                         <td>@info.Quantity</td>
                         <td>
                             <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
@@ -93,12 +93,7 @@ else
     <div class="col-12 row mt-2">
         <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
         <div>
-            <label class="form-control">@{String.Format("{0:0.00}", products.Join(wProducts,
-pd => pd.Id,
-wp => wp.ProductId,
-(pro, warPro) => new { pro.Price, warPro.Quantity }).Sum(x => x.Quantity * x.Price)
-);}
-            </label>
+            <label class="form-control">@String.Format("{0:0.00}", _total)</label>
 
 </div>
 
@@ -125,6 +120,7 @@ wp => wp.ProductId,
     private List<WarehouseProductInfo> wProducts;
     public bool Show { get; set; } = false;
     string _btnName = string.Empty;
+    decimal _total = 0;
     int _tempId = 0;
 
     protected override async Task OnInitializedAsync()
@@ -207,5 +203,11 @@ wp => wp.ProductId,
 
         wProducts = response.Items;
         MetaData = response.Meta;
+
+        wProducts.ForEach(x =>
+        {
+            x.Price = products.Where(y => y.Id == x.ProductId).Select(y => (decimal)y.Price).FirstOrDefault();
+            _total += (decimal)x.Quantity * (x.Price);
+        });
     }
 }

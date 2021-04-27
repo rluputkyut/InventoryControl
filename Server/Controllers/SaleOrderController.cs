@@ -28,7 +28,7 @@ namespace InventoryControl.Server.Controllers
         public SaleOrderHeaderList GetHeaders([FromQuery] PageParameters parameters)
         {
             List<SaleOrderHeaderInfo> _list = new List<SaleOrderHeaderInfo>();
-            var _headers = _dbContext.SaleOrderHeaders.Where(x => x.IsActive).OrderByDescending(x=>x.Id).ToList();
+            var _headers = _dbContext.SaleOrderHeaders.Where(x => x.IsActive).OrderByDescending(x => x.Id).ToList();
             var _customers = _dbContext.Customers.ToList();
             var _warehouses = _dbContext.Warehouses.ToList();
 
@@ -39,7 +39,7 @@ namespace InventoryControl.Server.Controllers
                     Id = x.Id,
                     Code = x.Code,
                     CustomerId = x.CustomerId,
-                    CustomerName = _customers.Where(y=> y.Id == x.CustomerId).Select(y=>y.Name).First(),
+                    CustomerName = _customers.Where(y => y.Id == x.CustomerId).Select(y => y.Name).First(),
                     WarehouseId = x.WarehouseId,
                     WarehouseName = _warehouses.Where(y => y.Id == x.WarehouseId).Select(y => y.Name).First(),
                     SellingDate = x.CreatedDate,
@@ -47,7 +47,7 @@ namespace InventoryControl.Server.Controllers
                     Delivered = x.Delivered,
                     IsCOD = x.CashOnDelivery,
                     IsAccountTransfer = x.AccountTransfer,
-                    TransferInfo = x.TransferInformation,                    
+                    TransferInfo = x.TransferInformation,
                 };
                 _list.Add(_info);
             });
@@ -99,7 +99,7 @@ namespace InventoryControl.Server.Controllers
                     ProductId = x.ProductId,
                     ProductName = _dbContext.Products.Where(z => z.Id == x.ProductId).Select(z => z.Name).FirstOrDefault(),
                     SellingPrice = x.SellingPrice,
-                    OtherExpense = x.OtherExpense == null? 0: (decimal)x.OtherExpense,
+                    OtherExpense = x.OtherExpense == null ? 0 : (decimal)x.OtherExpense,
                     Quantity = x.Quantity,
                 };
                 _list.Add(_info);
@@ -171,6 +171,24 @@ namespace InventoryControl.Server.Controllers
                 {
                     transaction.Rollback();
                 }
+            }
+
+            return _id;
+        }
+
+        [HttpGet]
+        [Route("updatestatus/{id}/{delivered}")]
+        public int UpdateStatus(int id, bool delivered)
+        {
+            int _id = 0;
+
+            if (_dbContext.SaleOrderHeaders.Where(x => x.Id == id && x.IsActive).Any())
+            {
+                var _header = _dbContext.SaleOrderHeaders.Where(x => x.Id == id && x.IsActive).First();
+                _id = _header.Id;
+                _header.Delivered = delivered;
+                _header.UpdatedDate = DateTime.Now;
+                _dbContext.SaveChanges();
             }
 
             return _id;

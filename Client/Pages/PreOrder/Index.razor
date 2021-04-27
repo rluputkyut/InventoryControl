@@ -26,26 +26,32 @@ else
                 <th>Order Date</th>
                 <th>Customer</th>
                 <th>Waiting Days</th>
-                <th>Deposit</th>
-                <th>Remark</th>
+                <th>Status</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var info in orders)
             {
-                <tr>
-                    <td>@info.Code</td>
-                    <td>@info.OrderDate</td>
-                    <td>@info.CustomerName</td>
-                    <td>@info.WaitingDays</td>
-                    <td>@String.Format("{0:0.00}", info.Deposit)</td>
-                    <td>@info.Remark</td>
-                    <td>
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
-                    </td>
+            <tr>
+                <td>@info.Code</td>
+                <td>@info.OrderDate</td>
+                <td>@info.CustomerName</td>
+                <td>@info.WaitingDays</td>
+                @if (info.SoldOut)
+                {
+                    <td>Sold</td>
+                }
+                else
+                {
+                    <td>Pending</td>
+                }
+            <td>
+                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnChangeStatus(info))">ChangeStatus</a> |
+                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
+                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+            </td>
                 </tr>
             }
         </tbody>
@@ -91,6 +97,21 @@ else
         var result = await Http.DeleteAsync("api/preorder/delete/" + info.Id);
 
         if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    async void OnChangeStatus(PreOrderHeaderInfo info)
+    {
+        var _status = info.SoldOut ? "Pending" : "Sold";
+
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to change the Status to '{_status}' for {info.Code}?"))
+            return;
+
+        info.SoldOut = !info.SoldOut;
+
+        var result = await Http.GetFromJsonAsync<int>($"api/preorder/updatestatus/{info.Id}/{info.SoldOut}");
+
+        if (result > 0)
             await LoadForm();
     }
 

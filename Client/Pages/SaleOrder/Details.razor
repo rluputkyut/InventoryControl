@@ -17,7 +17,6 @@ else
             <dt>
                 Code:
             </dt>
-
             <dd>
                 @headerOrder.Code
             </dd>
@@ -25,7 +24,6 @@ else
             <dt>
                 Selling Date:
             </dt>
-
             <dd>
                 @headerOrder.SellingDate
             </dd>
@@ -33,7 +31,6 @@ else
             <dt>
                 Customer:
             </dt>
-
             <dd>
                 @headerOrder.CustomerName
             </dd>
@@ -41,7 +38,6 @@ else
             <dt>
                 Warehouse:
             </dt>
-
             <dd>
                 @headerOrder.WarehouseName
             </dd>
@@ -49,7 +45,6 @@ else
             <dt>
                 Payment Type:
             </dt>
-
             <dd>
                 @(headerOrder.IsCOD? "Cash On Delivery" : $"Transfer Account Info:{headerOrder.TransferInfo}" )
             </dd>
@@ -57,9 +52,27 @@ else
             <dt>
                 Remark:
             </dt>
-
             <dd>
                 @headerOrder.Remark
+            </dd>
+
+            <dt>
+                Status:
+            </dt>
+            @if (headerOrder.Delivered)
+            {
+                <dd>Delivered</dd>
+            }
+            else
+            {
+                <dd>Pending</dd>
+            }
+
+            <dt>
+                Total Amount:
+            </dt>
+            <dd>
+                @String.Format("{0:0.00}", headerOrder.Items.Sum(x => (x.SellingPrice - x.OtherExpense) * x.Quantity))
             </dd>
         </dl>
 

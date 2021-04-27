@@ -29,6 +29,6 @@ namespace InventoryControl.Shared
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Quantity is Required!")]
         public int Quantity { get; set; }
-
+        public decimal Price { get; set; }
     }
 }

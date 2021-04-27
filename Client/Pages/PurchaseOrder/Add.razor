@@ -35,7 +35,7 @@ else
             <InputSelect id="WarehouseId" class="form-control" @bind-Value="headerInfo.WarehouseId">
                 @if (warehouses != null)
                     {
-                        <option value="0">Select</option>
+                    <option value="0">Select</option>
                     @foreach (var info in warehouses)
                         {
                         <option value="@info.Id">@info.Name</option>
@@ -54,28 +54,28 @@ else
         </div>
     </div>
     <br />
-    <div class="row col-md-12 mt-2">        
+    <div class="row col-md-12 mt-2">
         <div class="col-md-2">
             <label>Product:</label>
             <InputSelect id="ProductId" class="form-control" @bind-Value="itemInfo.ProductId">
                 @if (products != null)
                     {
-                        <option value="0">Select</option>
+                    <option value="0">Select</option>
                     @foreach (var product in products)
                         {
                         <option value="@product.Id">@product.Name</option>
                         }
                     }
             </InputSelect>
-        </div>        
+        </div>
         <div class="col-md-2">
             <label>Quantity:</label>
             <InputNumber id="Quantity" class="form-control" @bind-Value="itemInfo.Quantity" />
-        </div>        
+        </div>
         <div class="col-md-2">
             <label>Buying Price:</label>
             <InputNumber id="BuyingPrice" class="form-control" @bind-Value="itemInfo.BuyingPrice" />
-        </div>        
+        </div>
         <div class="col-md-2">
             <label>Currency:</label>
             <InputText id="Currency" class="form-control" @bind-Value="itemInfo.Currency" />
@@ -116,7 +116,12 @@ else
         </table>
         <ValidationMessage For="@(()=> headerInfo.Items)" />
     </div>
-
+    <div class="col-12 row mt-2">
+        <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
+        <div>
+            <label class="form-control">@String.Format("{0:0.00}", headerInfo.Items.Sum(x => x.BuyingPrice * x.Quantity))</label>
+        </div>
+    </div>
     <div class="row mt-2">
         <div class="col-md-12 text-right">
             <button type="submit" class="btn btn-success">Save</button>

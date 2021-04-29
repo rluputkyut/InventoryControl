@@ -23,10 +23,10 @@ else
             <thead>
                 <tr>
                     <th></th>
-                    <th><div>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></div></th>
-                    <th>Name</th>
-                    <th>BrandName</th>
-                    <th>ProductTypeName</th>
+                    <th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
+                    <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
+                    <th>BrandName <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "brand"))" /></th>
+                    <th>ProductTypeName <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "productType"))" /></th>
                     <th>Price</th>
                     <th>ExpiredDate</th>
                     <th></th>
@@ -72,6 +72,7 @@ else
     private List<ProductInfo> products;
     public bool Show { get; set; } = false;
     int _tempId = 0;
+    string _code, _name, _brand, _productType;
 
     void OnAddNew()
     {
@@ -110,9 +111,27 @@ else
         StateHasChanged();
     }
 
-    void OnSearchTextChanged(ChangeEventArgs changeEventArgs, string columnTitle)
-    { 
-        
+    async void OnSearchTextChanged(ChangeEventArgs changeEventArgs, string columnTitle)
+    {
+        switch (columnTitle)
+        {
+            case "code":
+                _code = changeEventArgs.Value.ToString();
+                break;
+            case "name":
+                _name = changeEventArgs.Value.ToString();
+                break;
+            case "brand":
+                _brand = changeEventArgs.Value.ToString();
+                break;
+            case "productType":
+                _productType = changeEventArgs.Value.ToString();
+                break;
+        }
+
+        await GetData(_pageParameters);
+
+        StateHasChanged();
     }
 
     //protected override async Task OnInitializedAsync()
@@ -136,7 +155,12 @@ else
 
     async Task GetData(PageParameters parameters)
     {
-        var response = await Http.GetFromJsonAsync<ProductList>($"api/product/getbypage?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+        _code = string.IsNullOrEmpty(_code) ? string.Empty : _code;
+        _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
+        _brand = string.IsNullOrEmpty(_brand) ? string.Empty : _brand;
+        _productType = string.IsNullOrEmpty(_productType) ? string.Empty : _productType;
+
+        var response = await Http.GetFromJsonAsync<ProductList>($"api/product/getbypage?PageNumber={_pageParameters.PageNumber}&PageSize={_pageParameters.PageSize}&Code={_code}&Name={_name}&Brand={_brand}&ProductType={_productType}");
 
         products = response.Items;
         MetaData = response.Meta;

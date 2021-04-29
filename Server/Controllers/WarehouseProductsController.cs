@@ -70,14 +70,14 @@ namespace InventoryControl.Server.Controllers
         }
 
         [HttpGet]
-        [Route("getbywarehouseid/{id}/{pageNumber}/{pageSize}")]
-        public WarehouseProductList GetByWarehouseId(int id, int pageNumber, int pageSize)
+        [Route("getbywarehouseid")]
+        public WarehouseProductList GetByWarehouseId([FromQuery] WarehouseProductListRequest request)
         {
             List<WarehouseProductInfo> _products = new List<WarehouseProductInfo>();
 
-            if (_dbContext.WarehouseProducts.Where(x => x.WarehouseId == id && x.IsActive).Any())
+            if (_dbContext.WarehouseProducts.Where(x => x.WarehouseId == request.WarehouseId && x.IsActive).Any())
             {
-                var _list = _dbContext.WarehouseProducts.Where(x => x.WarehouseId == id && x.IsActive).ToList();
+                var _list = _dbContext.WarehouseProducts.Where(x => x.WarehouseId == request.WarehouseId && x.IsActive).ToList();
 
                 foreach (WarehouseProduct _info in _list)
                 {
@@ -95,8 +95,13 @@ namespace InventoryControl.Server.Controllers
                 }
             }
 
+            if (!string.IsNullOrEmpty(request.Code))
+                _products = _products.Where(x => x.ProductCode.ToLower().Contains(request.Code.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.Name))
+                _products = _products.Where(x => x.ProductName.ToLower().Contains(request.Name.ToLower())).ToList();
+
             //return _productTypes;
-            var response = PagedList<WarehouseProductInfo>.ToPagedList(_products, pageNumber, pageSize);
+            var response = PagedList<WarehouseProductInfo>.ToPagedList(_products, request.PageNumber, request.PageSize);
             return new WarehouseProductList() { Items = response.ToList(), Meta = response.MetaData };
         }
 

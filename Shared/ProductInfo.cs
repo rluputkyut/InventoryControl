@@ -8,6 +8,13 @@ using System.Threading.Tasks;
 
 namespace InventoryControl.Shared
 {
+    public class ProductListRequest : PageParameters
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string Brand { get; set; }
+        public string ProductType { get; set; }
+    }
     public class ProductList
     {
         public List<ProductInfo> Items { get; set; }

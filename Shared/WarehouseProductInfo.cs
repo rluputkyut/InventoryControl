@@ -8,6 +8,13 @@ using System.Threading.Tasks;
 
 namespace InventoryControl.Shared
 {
+    public class WarehouseProductListRequest : PageParameters
+    {
+        public int WarehouseId { get; set; }
+        public string Code { get; set; }
+        public string Name { get; set; }
+    }
+
     public class WarehouseProductList
     {
         public List<WarehouseProductInfo> Items { get; set; }

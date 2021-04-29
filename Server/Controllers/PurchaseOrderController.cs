@@ -45,7 +45,7 @@ namespace InventoryControl.Server.Controllers
                 };
                 _list.Add(_info);
             });
-
+                        
             var response = PagedList<PurchaseOrderHeaderInfo>.ToPagedList(_list, parameters.PageNumber, parameters.PageSize);
             return new PurchaseOrderHeaderList() { Items = response.ToList(), Meta = response.MetaData };
             //return _list;

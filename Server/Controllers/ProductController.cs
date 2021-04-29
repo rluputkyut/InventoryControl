@@ -56,7 +56,7 @@ namespace InventoryControl.Server.Controllers
 
         [HttpGet]
         [Route("getbyPage")]
-        public ProductList GetByPage([FromQuery] PageParameters parameters)
+        public ProductList GetByPage([FromQuery] ProductListRequest request)
         {
             List<ProductInfo> _products = new List<ProductInfo>();
             var _productList = _dbContext.Products.Where(x => x.IsActive).ToList();
@@ -82,7 +82,16 @@ namespace InventoryControl.Server.Controllers
                 _products.Add(_info);
             });
 
-            var response = PagedList<ProductInfo>.ToPagedList(_products, parameters.PageNumber, parameters.PageSize);
+            if (!string.IsNullOrEmpty(request.Code))
+                _products = _products.Where(x => x.Code.ToLower().Contains(request.Code.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.Name))
+                _products = _products.Where(x => x.Name.ToLower().Contains(request.Name.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.Brand))
+                _products = _products.Where(x => x.BrandName.ToLower().Contains(request.Brand.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.ProductType))
+                _products = _products.Where(x => x.ProductTypeName.ToLower().Contains(request.ProductType.ToLower())).ToList();
+
+            var response = PagedList<ProductInfo>.ToPagedList(_products, request.PageNumber, request.PageSize);
             return new ProductList() { Items = response.ToList(), Meta = response.MetaData };
             //return _products;
         }

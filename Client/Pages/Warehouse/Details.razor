@@ -66,8 +66,8 @@ else
         <table class="table">
             <thead>
                 <tr>
-                    <th>Product Code</th>
-                    <th>Product Name</th>
+                    <th>Product Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
+                    <th>Product Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
                     <th>Price</th>
                     <th>Quantity</th>
                     <th></th>
@@ -120,6 +120,7 @@ else
     private List<WarehouseProductInfo> wProducts;
     public bool Show { get; set; } = false;
     string _btnName = string.Empty;
+    string _code, _name;
     decimal _total = 0;
     int _tempId = 0;
 
@@ -175,6 +176,23 @@ else
             await LoadForm();
     }
 
+    async void OnSearchTextChanged(ChangeEventArgs changeEventArgs, string columnTitle)
+    {
+        switch (columnTitle)
+        {
+            case "code":
+                _code = changeEventArgs.Value.ToString();
+                break;
+            case "name":
+                _name = changeEventArgs.Value.ToString();
+                break;
+        }
+
+        await GetData(_pageParameters);
+
+        StateHasChanged();
+    }
+
     private async Task LoadForm()
     {
         await Task.Delay(500);
@@ -199,7 +217,10 @@ else
 
     async Task GetData(PageParameters parameters)
     {
-        var response = await Http.GetFromJsonAsync<WarehouseProductList>($"api/warehouseproducts/getbywarehouseid/{id}/{parameters.PageNumber}/{parameters.PageSize}");
+        _code = string.IsNullOrEmpty(_code) ? string.Empty : _code;
+        _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
+
+        var response = await Http.GetFromJsonAsync<WarehouseProductList>($"api/warehouseproducts/getbywarehouseid?WarehouseId={id}&PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}&Code={_code}&Name={_name}");
 
         wProducts = response.Items;
         MetaData = response.Meta;

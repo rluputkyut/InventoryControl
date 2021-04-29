@@ -46,8 +46,6 @@ namespace InventoryControl.Server.Controllers
             return new WarehouseProductList() { Items = response.ToList(), Meta = response.MetaData };
         }
 
-
-
         [HttpGet]
         [Route("getbyid/{id}")]
         public WarehouseProductInfo GetById(int id)

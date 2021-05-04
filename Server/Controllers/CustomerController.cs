@@ -49,7 +49,7 @@ namespace InventoryControl.Server.Controllers
 
         [HttpGet]
         [Route("getbyPage")]
-        public CustomerList GetByPage([FromQuery] PageParameters parameters)
+        public CustomerList GetByPage([FromQuery] CustomerListRequest request)
         {
             List<CustomerInfo> _customers = new List<CustomerInfo>();
             var _list = _dbContext.Customers.Where(x => x.IsActive).ToList();
@@ -68,7 +68,20 @@ namespace InventoryControl.Server.Controllers
                 _customers.Add(_info);
             });
 
-            var response = PagedList<CustomerInfo>.ToPagedList(_customers, parameters.PageNumber, parameters.PageSize);
+            if(!string.IsNullOrEmpty(request.Code))
+                _customers = _customers.Where(x => x.Code.ToLower().Contains(request.Code.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.Name))
+                _customers = _customers.Where(x => x.Name.ToLower().Contains(request.Name.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.NickName))
+                _customers = _customers.Where(x => x.NickName.ToLower().Contains(request.NickName.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.PhoneNo))
+                _customers = _customers.Where(x => x.PhoneNo.ToLower().Contains(request.PhoneNo.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.Address))
+                _customers = _customers.Where(x => x.Address.ToLower().Contains(request.Address.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.Account))
+                _customers = _customers.Where(x => x.AccountInformation.ToLower().Contains(request.Account.ToLower())).ToList();
+
+            var response = PagedList<CustomerInfo>.ToPagedList(_customers, request.PageNumber, request.PageSize);
             return new CustomerList() { Items = response.ToList(), Meta = response.MetaData };
             //return _customers;
         }

@@ -8,6 +8,15 @@ using System.Threading.Tasks;
 
 namespace InventoryControl.Shared
 {
+    public class CustomerListRequest : PageParameters
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string NickName { get; set; }
+        public string PhoneNo { get; set; }
+        public string Address { get; set; }
+        public string Account { get; set; }
+    }
     public class CustomerList
     {
         public List<CustomerInfo> Items { get; set; }

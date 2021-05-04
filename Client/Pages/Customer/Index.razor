@@ -22,12 +22,12 @@ else
     <table class="table col-lg-10 col-md-10 col-sm-10">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Nick Name</th>
-                <th>Phone No</th>
-                <th>Address</th>
-                <th>Account Information</th>
+                <th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
+                <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
+                <th>Nick Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "nickName"))" /></th>
+                <th>Phone No<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "phoneNo"))" /></th>
+                <th>Address<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "address"))" /></th>
+                <th>Account Information<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "account"))" /></th>
                 <th></th>
             </tr>
         </thead>
@@ -62,6 +62,7 @@ else
     private List<CustomerInfo> customers;
     public bool Show { get; set; } = false;
     int _tempId = 0;
+    string _code, _name, _nickName, _phoneNo, _address, _account;
 
     void OnAddNew()
     {
@@ -100,6 +101,35 @@ else
         StateHasChanged();
     }
 
+    async void OnSearchTextChanged(ChangeEventArgs changeEventArgs, string columnTitle)
+    {
+        switch (columnTitle)
+        {
+            case "code":
+                _code = changeEventArgs.Value.ToString();
+                break;
+            case "name":
+                _name = changeEventArgs.Value.ToString();
+                break;
+            case "nickName":
+                _nickName = changeEventArgs.Value.ToString();
+                break;
+            case "phoneNo":
+                _phoneNo = changeEventArgs.Value.ToString();
+                break;
+            case "address":
+                _address = changeEventArgs.Value.ToString();
+                break;
+            case "account":
+                _account = changeEventArgs.Value.ToString();
+                break;
+        }
+
+        await GetData(_pageParameters);
+
+        StateHasChanged();
+    }
+
     //protected override async Task OnInitializedAsync()
     //{
     //    products = await Http.GetFromJsonAsync<List<ProductInfo>>("api/product/get");
@@ -121,7 +151,14 @@ else
 
     async Task GetData(PageParameters parameters)
     {
-        var response = await Http.GetFromJsonAsync<CustomerList>($"api/customer/getbypage?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+        _code = string.IsNullOrEmpty(_code) ? string.Empty : _code;
+        _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
+        _nickName = string.IsNullOrEmpty(_nickName) ? string.Empty : _nickName;
+        _phoneNo = string.IsNullOrEmpty(_phoneNo) ? string.Empty : _phoneNo;
+        _address = string.IsNullOrEmpty(_address) ? string.Empty : _address;
+        _account = string.IsNullOrEmpty(_account) ? string.Empty : _account;
+
+        var response = await Http.GetFromJsonAsync<CustomerList>($"api/customer/getbypage?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}&Code={_code}&Name={_name}&NickName={_nickName}&PhoneNo={_phoneNo}&Address={_address}&Account={_account}");
 
         customers = response.Items;
         MetaData = response.Meta;

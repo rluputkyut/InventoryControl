@@ -137,6 +137,14 @@ namespace InventoryControl.Server.Controllers
                             CreatedDate = DateTime.Now
                         };
                         _dbContext.TransferProductItems.Add(_transferproductItem);
+
+                        if (_dbContext.WarehouseProducts.Where(x => x.WarehouseId == info.FromWarehouseId && x.ProductId == item.ProductId && x.IsActive).Any())
+                        {
+                            var _product = _dbContext.WarehouseProducts.Where(x => x.WarehouseId == info.FromWarehouseId && x.ProductId == item.ProductId && x.IsActive).First();
+                            _product.Quantity -= item.Quantity;
+                            _product.UpdatedDate = DateTime.Now;
+                        }
+
                         _dbContext.SaveChanges();
                     }
 
@@ -217,7 +225,19 @@ namespace InventoryControl.Server.Controllers
                 _info.UpdatedDate = DateTime.Now;
 
                 var _oldItems = _dbContext.TransferProductItems.Where(x => x.HeaderId == _info.Id && x.IsActive).ToList();
-                _oldItems.ForEach(x => { x.IsActive = false; x.UpdatedDate = DateTime.Now; });
+                _oldItems.ForEach(x => 
+                { 
+                    x.IsActive = false; 
+                    x.UpdatedDate = DateTime.Now;
+
+                    if (_dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.FromWarehouseId && x.ProductId == x.ProductId && x.IsActive).Any())
+                    {
+                        var _product = _dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.FromWarehouseId && x.ProductId == x.ProductId && x.IsActive).First();
+                        _product.Quantity += x.Quantity;
+                        _product.UpdatedDate = DateTime.Now;
+                    }
+
+                });
 
                 _result = _dbContext.SaveChanges() > 0;
             }

@@ -220,7 +220,7 @@ else
         _code = string.IsNullOrEmpty(_code) ? string.Empty : _code;
         _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
 
-        var response = await Http.GetFromJsonAsync<WarehouseProductList>($"api/warehouseproducts/getbywarehouseid?WarehouseId={id}&PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}&Code={_code}&Name={_name}");
+        var response = await Http.GetFromJsonAsync<WarehouseProductList>($"api/warehouseproducts/getpgbywarehouseid?WarehouseId={id}&PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}&Code={_code}&Name={_name}");
 
         wProducts = response.Items;
         MetaData = response.Meta;

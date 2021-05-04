@@ -68,8 +68,8 @@ namespace InventoryControl.Server.Controllers
         }
 
         [HttpGet]
-        [Route("getbywarehouseid")]
-        public WarehouseProductList GetByWarehouseId([FromQuery] WarehouseProductListRequest request)
+        [Route("getpgbywarehouseid")]
+        public WarehouseProductList GetPgByWarehouseId([FromQuery] WarehouseProductListRequest request)
         {
             List<WarehouseProductInfo> _products = new List<WarehouseProductInfo>();
 
@@ -101,6 +101,34 @@ namespace InventoryControl.Server.Controllers
             //return _productTypes;
             var response = PagedList<WarehouseProductInfo>.ToPagedList(_products, request.PageNumber, request.PageSize);
             return new WarehouseProductList() { Items = response.ToList(), Meta = response.MetaData };
+        }
+
+        [HttpGet]
+        [Route("getbywarehouseid/{id}")]
+        public List<WarehouseProductInfo> GetByWarehouseId(int id)
+        {
+            List<WarehouseProductInfo> _products = new List<WarehouseProductInfo>();
+
+            if (_dbContext.WarehouseProducts.Where(x => x.WarehouseId == id && x.IsActive).Any())
+            {
+                var _list = _dbContext.WarehouseProducts.Where(x => x.WarehouseId == id && x.IsActive).ToList();
+
+                foreach (WarehouseProduct _info in _list)
+                {
+                    var _product = _dbContext.Products.Where(x => x.Id == _info.ProductId && x.IsActive).FirstOrDefault();
+
+                    _products.Add(new WarehouseProductInfo()
+                    {
+                        Id = _info.Id,
+                        WarehouseId = _info.WarehouseId,
+                        ProductId = _info.ProductId,
+                        ProductCode = _product.Code,
+                        ProductName = _product.Name,
+                        Quantity = _info.Quantity
+                    });
+                }
+            }
+            return _products;            
         }
 
         [HttpPut]

@@ -39,7 +39,8 @@ namespace InventoryControl.Server.Controllers
                     NickName = x.NickName,
                     AccountInformation = x.AccountInformation,
                     PhoneNo = x.PhoneNo,
-                    Address = x.Address
+                    Address = x.Address,
+                    Type = (CustomerType)Enum.ToObject(typeof(CustomerType), x.Type)
                 };
                 _customers.Add(_info);
             });
@@ -63,8 +64,9 @@ namespace InventoryControl.Server.Controllers
                     NickName = x.NickName,
                     AccountInformation = x.AccountInformation,
                     PhoneNo = x.PhoneNo,
-                    Address = x.Address
-                };
+                    Address = x.Address,
+                    Type = (CustomerType)Enum.ToObject(typeof(CustomerType), x.Type)
+            };
                 _customers.Add(_info);
             });
 
@@ -103,7 +105,8 @@ namespace InventoryControl.Server.Controllers
                     NickName = _info.NickName,
                     Address = _info.Address,
                     AccountInformation = _info.AccountInformation,
-                    PhoneNo = _info.PhoneNo
+                    PhoneNo = _info.PhoneNo,
+                    Type = (CustomerType)Enum.ToObject(typeof(CustomerType), _info.Type)
                 };
             }
 
@@ -136,7 +139,8 @@ namespace InventoryControl.Server.Controllers
                     NickName = x.NickName,
                     AccountInformation = x.AccountInformation,
                     PhoneNo = x.PhoneNo,
-                    Address = x.Address
+                    Address = x.Address,
+                    Type = (CustomerType)Enum.ToObject(typeof(CustomerType), x.Type)
                 };
                 _customers.Add(_info);
             });
@@ -159,6 +163,7 @@ namespace InventoryControl.Server.Controllers
                 _info.AccountInformation = info.AccountInformation;
                 _info.Address = info.Address;
                 _info.PhoneNo = info.PhoneNo;
+                _info.Type = (int)info.Type;
                 _info.UpdatedDate = DateTime.Now;
                 _result = _dbContext.SaveChanges() > 0;
             }
@@ -179,6 +184,7 @@ namespace InventoryControl.Server.Controllers
                 Address = info.Address,
                 AccountInformation = info.AccountInformation,
                 PhoneNo = info.PhoneNo,
+                Type = (int)info.Type,
                 IsActive = true, 
                 CreatedDate = DateTime.Now 
             };

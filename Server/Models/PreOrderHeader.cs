@@ -17,6 +17,7 @@ namespace InventoryControl.Server.Models
         public int WaitingDay { get; set; }
         public decimal Deposit { get; set; }
         public int CustomerId { get; set; }
+        public int WarehouseId { get; set; }
         public string Remark { get; set; }
         public bool SoldOut { get; set; }
         public DateTime CreatedDate { get; set; }

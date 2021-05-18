@@ -26,7 +26,7 @@ else
                 <th>Transfer Date</th>
                 <th>From Warehouse</th>
                 <th>To Warehouse</th>
-                <th>Cost</th>
+                @*<th>Cost</th>*@
                 <th>Remark</th>
                 <th></th>
             </tr>
@@ -39,7 +39,7 @@ else
                     <td>@info.TransferDate</td>
                     <td>@info.FromWarehouseName</td>
                     <td>@info.ToWarehouseName</td>
-                    <td>@String.Format("{0:0.00}", info.Cost)</td>
+                    @*<td>@String.Format("{0:0.00}", info.Cost)</td>*@
                     <td>@info.Remark</td>
                     <td>
                         @*<a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |*@

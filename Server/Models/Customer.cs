@@ -20,6 +20,7 @@ namespace InventoryControl.Server.Models
         public string PhoneNo { get; set; }
         public string Address { get; set; }
         public string AccountInformation { get; set; }
+        public int Type { get; set; }
         public DateTime CreatedDate { get; set; }
         public bool IsActive { get; set; }
         public DateTime? UpdatedDate { get; set; }

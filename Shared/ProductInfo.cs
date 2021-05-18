@@ -46,10 +46,8 @@ namespace InventoryControl.Shared
         public int ProductTypeId { get; set; }
         public string ProductTypeName { get; set; }
 
-        public decimal? Size { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Price is Required!")]
-        public decimal? Price { get; set; }
+        public decimal? Size { get; set; }                
+        public string BatchCode { get; set; }
         public DateTime? ManufactureDate { get; set; }
         public DateTime? ExpiredDate { get; set; }
     }

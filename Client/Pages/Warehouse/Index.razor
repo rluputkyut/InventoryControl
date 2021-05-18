@@ -22,21 +22,23 @@ else
             <tr>
                 <th>Code</th>
                 <th>Name</th>
+                <th>Currency</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var info in warehouses)
             {
-                <tr>
-                    <td>@info.Code</td>
-                    <td>@info.Name</td>
-                    <td>
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Add Products</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>@info.Code</td>
+                <td>@info.Name</td>
+                <td>@info.CurrencyCode</td>
+                <td>
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Instocks</a>
+                </td>
+            </tr>
             }
         </tbody>
     </table>

@@ -21,6 +21,11 @@ namespace InventoryControl.Shared
         public string Code { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Warehouse is Required!")]
+        public int WarehouseId { get; set; }
+        public string WarehouseName { get; set; }
+
+        [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Customer is Required!")]
         public int CustomerId { get; set; }
         public string CustomerName { get; set; }

@@ -24,7 +24,7 @@ namespace InventoryControl.Server.Models
         public int BrandId { get; set; }
         public int ProductTypeId { get; set; }
         public decimal? Size { get; set; }
-        public decimal? Price { get; set; }
+        public string BatchCode { get; set; }
         public DateTime? ManufactureDate { get; set; }
         public DateTime? ExpiredDate { get; set; }
         public DateTime CreatedDate { get; set; }

@@ -39,11 +39,11 @@ namespace InventoryControl.Server.Controllers
                     Name = x.Name,
                     Description = x.Description,
                     BrandId = x.BrandId,
+                    BatchCode = x.BatchCode,
                     BrandName = _dbContext.Brands.Where(y => y.Id == x.BrandId).Select(y=>y.Name).FirstOrDefault(),
                     ProductTypeId = x.ProductTypeId,
                     ProductTypeName = _dbContext.ProductTypes.Where(y => y.Id == x.ProductTypeId).Select(y => y.Name).FirstOrDefault(),
                     Photo = x.Photo  == null? string.Empty : Convert.ToBase64String(x.Photo),
-                    Price = x.Price,
                     Size = x.Size,
                     ExpiredDate = x.ExpiredDate,
                     ManufactureDate = x.ManufactureDate
@@ -70,11 +70,11 @@ namespace InventoryControl.Server.Controllers
                     Name = x.Name,
                     Description = x.Description,
                     BrandId = x.BrandId,
+                    BatchCode = x.BatchCode,
                     BrandName = _dbContext.Brands.Where(y => y.Id == x.BrandId).Select(y => y.Name).FirstOrDefault(),
                     ProductTypeId = x.ProductTypeId,
                     ProductTypeName = _dbContext.ProductTypes.Where(y => y.Id == x.ProductTypeId).Select(y => y.Name).FirstOrDefault(),
                     Photo = x.Photo == null ? string.Empty : Convert.ToBase64String(x.Photo),
-                    Price = x.Price,
                     Size = x.Size,
                     ExpiredDate = x.ExpiredDate,
                     ManufactureDate = x.ManufactureDate
@@ -112,11 +112,11 @@ namespace InventoryControl.Server.Controllers
                     Name = _info.Name,
                     Description = _info.Description,
                     BrandId = _info.BrandId,
+                    BatchCode = _info.BatchCode,
                     BrandName = _dbContext.Brands.Where(y => y.Id == _info.BrandId).Select(y => y.Name).FirstOrDefault(),
                     ProductTypeId = _info.ProductTypeId,
                     ProductTypeName = _dbContext.ProductTypes.Where(y => y.Id == _info.ProductTypeId).Select(y => y.Name).FirstOrDefault(),
                     Photo = _info.Photo == null ? string.Empty : Convert.ToBase64String(_info.Photo),
-                    Price = _info.Price,
                     Size = _info.Size,
                     ExpiredDate = _info.ExpiredDate,
                     ManufactureDate = _info.ManufactureDate
@@ -151,11 +151,11 @@ namespace InventoryControl.Server.Controllers
                     Name = x.Name,
                     Description = x.Description,
                     BrandId = x.BrandId,
+                    BatchCode = x.BatchCode,
                     BrandName = _dbContext.Brands.Where(y => y.Id == x.BrandId).Select(y => y.Name).FirstOrDefault(),
                     ProductTypeId = x.ProductTypeId,
                     ProductTypeName = _dbContext.ProductTypes.Where(y => y.Id == x.ProductTypeId).Select(y => y.Name).FirstOrDefault(),
                     Photo = Convert.ToBase64String(x.Photo),
-                    Price = x.Price,
                     Size = x.Size,
                     ExpiredDate = x.ExpiredDate,
                     ManufactureDate = x.ManufactureDate
@@ -180,7 +180,7 @@ namespace InventoryControl.Server.Controllers
                 _info.Description = info.Description;
                 _info.BrandId = info.BrandId;
                 _info.ProductTypeId = info.ProductTypeId;                
-                _info.Price = info.Price;
+                _info.BatchCode = info.BatchCode;
                 _info.Photo = string.IsNullOrEmpty(info.Photo) ? _info.Photo : Convert.FromBase64String(info.Photo);
                 _info.Size = info.Size == null ? info.Size : _info.Size;
                 _info.ExpiredDate = info.ExpiredDate == null ? info.ExpiredDate : _info.ExpiredDate;
@@ -208,7 +208,7 @@ namespace InventoryControl.Server.Controllers
                     BrandId = info.BrandId,
                     ProductTypeId = info.ProductTypeId,
                     Photo = string.IsNullOrEmpty(info.Photo) ? null : Convert.FromBase64String(info.Photo),
-                    Price = info.Price,
+                    BatchCode = info.BatchCode,
                     Size = info.Size,
                     ExpiredDate = info.ExpiredDate,
                     ManufactureDate = info.ManufactureDate,

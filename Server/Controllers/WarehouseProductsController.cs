@@ -36,7 +36,8 @@ namespace InventoryControl.Server.Controllers
                     Id = x.Id,
                     WarehouseId = x.WarehouseId,
                     ProductId = x.ProductId,
-                    Quantity = x.Quantity
+                    Quantity = x.Quantity,
+                    Price = x.Price
                 };
                 _products.Add(_info);
             });
@@ -60,7 +61,8 @@ namespace InventoryControl.Server.Controllers
                     Id = _info.Id, 
                     WarehouseId = _info.WarehouseId, 
                     ProductId = _info.ProductId,
-                    Quantity = _info.Quantity 
+                    Quantity = _info.Quantity ,
+                    Price = _info.Price,                    
                 };
             }
 
@@ -80,6 +82,8 @@ namespace InventoryControl.Server.Controllers
                 foreach (WarehouseProduct _info in _list)
                 {
                     var _product = _dbContext.Products.Where(x => x.Id == _info.ProductId && x.IsActive).FirstOrDefault();
+                    var _brand = _dbContext.Brands.Where(x => x.Id == _product.BrandId && x.IsActive).FirstOrDefault();
+                    var _productType = _dbContext.ProductTypes.Where(x => x.Id == _product.ProductTypeId && x.IsActive).FirstOrDefault();
 
                     _products.Add(new WarehouseProductInfo()
                     {
@@ -88,8 +92,15 @@ namespace InventoryControl.Server.Controllers
                         ProductId = _info.ProductId,
                         ProductCode = _product.Code,
                         ProductName = _product.Name,
-                        Quantity = _info.Quantity
-                    });
+                        BrandName = _brand.Name,
+                        ProductType = _productType.Name,
+                        Size = _product.Size,
+                        Quantity = _info.Quantity,
+                        Price = _info.Price,
+                        BatchCode = _product.BatchCode,
+                        ManufactureDate = _product.ManufactureDate,
+                        ExpiredDate = _product.ExpiredDate
+                    }) ;
                 }
             }
 
@@ -97,6 +108,10 @@ namespace InventoryControl.Server.Controllers
                 _products = _products.Where(x => x.ProductCode.ToLower().Contains(request.Code.ToLower())).ToList();
             if (!string.IsNullOrEmpty(request.Name))
                 _products = _products.Where(x => x.ProductName.ToLower().Contains(request.Name.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.Brand))
+                _products = _products.Where(x => x.BrandName.ToLower().Contains(request.Brand.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(request.Type))
+                _products = _products.Where(x => x.ProductType.ToLower().Contains(request.Type.ToLower())).ToList();
 
             //return _productTypes;
             var response = PagedList<WarehouseProductInfo>.ToPagedList(_products, request.PageNumber, request.PageSize);
@@ -124,7 +139,8 @@ namespace InventoryControl.Server.Controllers
                         ProductId = _info.ProductId,
                         ProductCode = _product.Code,
                         ProductName = _product.Name,
-                        Quantity = _info.Quantity
+                        Quantity = _info.Quantity,
+                        Price = _info.Price
                     });
                 }
             }
@@ -143,6 +159,7 @@ namespace InventoryControl.Server.Controllers
                 _info.ProductId = info.ProductId;
                 _info.WarehouseId = info.WarehouseId;
                 _info.Quantity = info.Quantity;
+                _info.Price = info.Price;
                 _info.UpdatedDate = DateTime.Now;
                 _result = _dbContext.SaveChanges() > 0;
             }
@@ -163,6 +180,7 @@ namespace InventoryControl.Server.Controllers
                     ProductId = info.ProductId, 
                     WarehouseId = info.WarehouseId, 
                     Quantity = info.Quantity,
+                    Price = info.Price,
                     IsActive = true, 
                     CreatedDate = DateTime.Now 
                 };

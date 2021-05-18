@@ -13,30 +13,37 @@
 }
 else
 {
-    <EditForm Model="warehouse" OnValidSubmit="Create" class="card card-body bg-light mt-5">
-        <DataAnnotationsValidator />
+<EditForm Model="warehouse" OnValidSubmit="Create" class="card card-body bg-light mt-5">
+    <DataAnnotationsValidator />
 
-        <div class="col-12 row mt-2">
-            <label for="Code" class="col-md-2 col-form-label">Code:</label>
-            <div >
-                <InputText id="Code" class="form-control" @bind-Value="warehouse.Code" />
-                <ValidationMessage For="@(()=> warehouse.Code)" />
-            </div>
+    <div class="col-12 row mt-2">
+        <label for="Code" class="col-md-2 col-form-label">Code:</label>
+        <div>
+            <InputText id="Code" class="form-control" @bind-Value="warehouse.Code" />
+            <ValidationMessage For="@(()=> warehouse.Code)" />
         </div>
-        <div class="col-12 row mt-2">
-            <label for="Name" class="col-md-2 col-form-label">Name:</label>
-            <div>
-                <InputText id="Name" class="form-control" @bind-Value="warehouse.Name" />
-                <ValidationMessage For="@(()=> warehouse.Name)" />
-            </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Name" class="col-md-2 col-form-label">Name:</label>
+        <div>
+            <InputText id="Name" class="form-control" @bind-Value="warehouse.Name" />
+            <ValidationMessage For="@(()=> warehouse.Name)" />
         </div>
-        <div class="row mt-2">
-            <div class="col-md-12 text-right">
-                <button type="submit" class="btn btn-success">Save</button>
-                <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
-            </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="CurrencyCode" class="col-md-2 col-form-label">CurrencyCode:</label>
+        <div>
+            <InputText id="CurrencyCode" class="form-control" @bind-Value="warehouse.CurrencyCode" />
+            <ValidationMessage For="@(()=> warehouse.CurrencyCode)" />
         </div>
-    </EditForm>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-12 text-right">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="@Back">Cancel</button>
+        </div>
+    </div>
+</EditForm>
 }
 <br />
 

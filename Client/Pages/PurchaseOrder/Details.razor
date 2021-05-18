@@ -53,7 +53,7 @@ else
                 Total Amount:
             </dt>
             <dd>
-                @String.Format("{0:0.00}", headerOrder.Items.Sum(x => x.BuyingPrice * x.Quantity))
+                @String.Format("{0:0.00} {1}", headerOrder.Items.Sum(x => x.BuyingPrice * x.Quantity), _currencyCode)
             </dd>
         </dl>
 
@@ -104,7 +104,7 @@ else
 
     [Parameter]
     public int id { get; set; }
-
+    string _currencyCode { get; set; }
     private PurchaseOrderHeaderInfo headerOrder;
 
     protected override async Task OnInitializedAsync()
@@ -116,6 +116,8 @@ else
         {
             headerOrder = await Http.GetFromJsonAsync<PurchaseOrderHeaderInfo>($"api/purchaseorder/getheaderbyid/{id}");
             headerOrder.Items = await Http.GetFromJsonAsync<List<PurchaseOrderItemInfo>>($"api/purchaseorder/getitemsbyid/{id}");
+            var _warehouse = await Http.GetFromJsonAsync<WarehouseInfo>($"api/warehouse/getbyid/{headerOrder.WarehouseId}");
+            _currencyCode = _warehouse.CurrencyCode;
         }
 
     }

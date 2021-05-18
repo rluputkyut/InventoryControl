@@ -28,24 +28,26 @@ else
                 <th>Phone No<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "phoneNo"))" /></th>
                 <th>Address<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "address"))" /></th>
                 <th>Account Information<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "account"))" /></th>
+                <th>Type </th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var info in customers)
             {
-                <tr>
-                    <td>@info.Code</td>
-                    <td>@info.Name</td>
-                    <td>@info.NickName</td>
-                    <td>@info.PhoneNo</td>
-                    <td>@info.Address</td>
-                    <td>@info.AccountInformation</td>
-                    <td>
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>@info.Code</td>
+                <td>@info.Name</td>
+                <td>@info.NickName</td>
+                <td>@info.PhoneNo</td>
+                <td>@info.Address</td>
+                <td>@info.AccountInformation</td>
+                <td>@info.Type.ToString()</td>
+                <td>
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                </td>
+            </tr>
             }
         </tbody>
     </table>

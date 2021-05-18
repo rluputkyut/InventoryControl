@@ -15,59 +15,65 @@
 }
 else
 {
-    <EditForm Model="wProduct" OnValidSubmit="Create" class="card card-body bg-light mt-2">
-        <DataAnnotationsValidator />
+<EditForm Model="wProduct" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+    <DataAnnotationsValidator />
 
-        <div class="col-12 row mt-2">
-            <label for="Code" class="col-md-2 col-form-label">Code:</label>
-            <div>
-                <label class="form-control">@warehouse.Code</label>
-            </div>
+    <div class="col-12 row mt-2">
+        <label for="Name" class="col-md-2 col-form-label">Name:</label>
+        <div>
+            <label class="form-control">@warehouse.Name</label>
         </div>
-        <div class="col-12 row mt-2">
-            <label for="Name" class="col-md-2 col-form-label">Name:</label>
-            <div>
-                <label class="form-control">@warehouse.Name</label>
-            </div>
-        </div>
-        <div class="col-12 row mt-2">
-            <label for="ProductId" class="col-md-2 col-form-label">Product:</label>
-            <div>
-                <InputSelect id="ProductId" class="form-control" @bind-Value="wProduct.ProductId">
-                    @if (products != null)
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="ProductId" class="col-md-2 col-form-label">Product:</label>
+        <div>
+            <InputSelect id="ProductId" class="form-control" @bind-Value="wProduct.ProductId">
+                @if (products != null)
                     {
-                        <option value="0">Select</option>
-                        @foreach (var info in products)
+                    <option value="0">Select</option>
+                    @foreach (var info in products)
                         {
-                            <option value="@info.Id">@info.Name</option>
+                        <option value="@info.Id">@info.Name</option>
                         }
                     }
-                </InputSelect>
-                <ValidationMessage For="@(() => wProduct.ProductId)" />
-            </div>
+            </InputSelect>
+            <ValidationMessage For="@(() => wProduct.ProductId)" />
         </div>
-        <div class="col-12 row mt-2">
-            <label for="Size" class="col-md-2 col-form-label">Quantity:</label>
-            <div>
-                <InputNumber id="Size" class="form-control" @bind-Value="wProduct.Quantity" />
-                <ValidationMessage For="@(() => wProduct.Quantity)" />
-            </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Size" class="col-md-2 col-form-label">Quantity:</label>
+        <div>
+            <InputNumber id="Size" class="form-control" @bind-Value="wProduct.Quantity" />
+            <ValidationMessage For="@(() => wProduct.Quantity)" />
         </div>
-        <div class="row mt-2">
-            <div class="col-md-12 text-right">
-                <button type="submit" class="btn btn-primary">@_btnName</button>
-                <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
-                <button type="button" class="btn btn-secondary" @onclick="OnBack">Back</button>
-            </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="Price" class="col-md-2 col-form-label">Price:</label>
+        <div>
+            <InputNumber id="Price" class="form-control" @bind-Value="wProduct.Price" />
+            <ValidationMessage For="@(()=> wProduct.Price)" />
         </div>
-    </EditForm>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-12 text-right">
+            <button type="submit" class="btn btn-primary">@_btnName</button>
+            <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+            <button type="button" class="btn btn-secondary" @onclick="OnBack">Back</button>
+        </div>
+    </div>
+</EditForm>
 
     <div class="row">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Product Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
-                    <th>Product Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
+                    <th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
+                    <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
+                    <th>Brand <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "brand"))" /></th>
+                    <th>Type <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "type"))" /></th>
+                    <th>Size</th>
+                    <th>Manufactured</th>
+                    <th>Expired</th>
                     <th>Price</th>
                     <th>Quantity</th>
                     <th></th>
@@ -76,16 +82,21 @@ else
             <tbody>
                 @foreach (var info in wProducts)
                 {
-                    <tr>
-                        <td>@info.ProductCode</td>
-                        <td>@info.ProductName</td>
-                        <td>@String.Format("{0:0.00}", info.Price)</td>
-                        <td>@info.Quantity</td>
-                        <td>
-                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
-                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>@info.ProductCode</td>
+                    <td>@info.ProductName</td>
+                    <td>@info.BrandName</td>
+                    <td>@info.ProductType</td>
+                    <td>@String.Format("{0:0.00}", info.Size)</td>
+                    <td>@info.ManufactureDate</td>
+                    <td>@info.ExpiredDate</td>
+                    <td>@String.Format("{0:0.00}", info.Price)</td>
+                    <td>@info.Quantity</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>
@@ -93,7 +104,7 @@ else
     <div class="col-12 row mt-2">
         <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
         <div>
-            <label class="form-control">@String.Format("{0:0.00}", _total)</label>
+            <label class="form-control">@String.Format("{0:0.00} {1}", _total, warehouse.CurrencyCode)</label>
 
 </div>
 
@@ -120,7 +131,7 @@ else
     private List<WarehouseProductInfo> wProducts;
     public bool Show { get; set; } = false;
     string _btnName = string.Empty;
-    string _code, _name;
+    string _code, _name, _brand, _type;
     decimal _total = 0;
     int _tempId = 0;
 
@@ -186,6 +197,12 @@ else
             case "name":
                 _name = changeEventArgs.Value.ToString();
                 break;
+            case "brand":
+                _brand = changeEventArgs.Value.ToString();
+                break;
+            case "type":
+                _type = changeEventArgs.Value.ToString();
+                break;
         }
 
         await GetData(_pageParameters);
@@ -220,15 +237,14 @@ else
         _code = string.IsNullOrEmpty(_code) ? string.Empty : _code;
         _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
 
-        var response = await Http.GetFromJsonAsync<WarehouseProductList>($"api/warehouseproducts/getpgbywarehouseid?WarehouseId={id}&PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}&Code={_code}&Name={_name}");
+        var response = await Http.GetFromJsonAsync<WarehouseProductList>($"api/warehouseproducts/getpgbywarehouseid?WarehouseId={id}&PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}&Code={_code}&Name={_name}&Brand={_brand}&Type={_type}");
 
         wProducts = response.Items;
         MetaData = response.Meta;
 
         wProducts.ForEach(x =>
         {
-            x.Price = products.Where(y => y.Id == x.ProductId).Select(y => (decimal)y.Price).FirstOrDefault();
-            _total += (decimal)x.Quantity * (x.Price);
+            _total += (decimal)x.Quantity * (decimal)x.Price;
         });
     }
 }

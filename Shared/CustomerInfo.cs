@@ -36,6 +36,7 @@ namespace InventoryControl.Shared
         [Required(ErrorMessage = "NickName is Required!")]
         public string NickName { get; set; }
 
+        public CustomerType Type { get; set; }
         //[DataType(DataType.PhoneNumber)]
         //[RegularExpression(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$", ErrorMessage = "Invalid Phone No!")]
         [Required(ErrorMessage = "PhoneNo is Required!")]
@@ -43,5 +44,15 @@ namespace InventoryControl.Shared
 
         public string Address { get; set; }
         public string AccountInformation { get; set; }
+    }
+
+    public enum CustomerType
+    {
+        [Display(Name = "Normal")]
+        Normal = 0,
+        [Display(Name = "Bad")]
+        Bad = 1,
+        [Display(Name = "Good")]
+        Good = 2
     }
 }

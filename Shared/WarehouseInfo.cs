@@ -16,5 +16,8 @@ namespace InventoryControl.Shared
 
         [Required(ErrorMessage = "Name is Required!")]
         public string Name { get; set; }
+
+        [Required(ErrorMessage = "Currency is Required!")]
+        public string CurrencyCode { get; set; }
     }
 }

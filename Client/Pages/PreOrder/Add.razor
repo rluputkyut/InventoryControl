@@ -40,6 +40,23 @@ else
         </div>
     </div>
     <div class="col-12 row mt-2">
+        <label for="customerId" class="col-md-2 col-form-label">Customer:</label>
+        <div>
+            <Select id="WarehouseId" class="form-control" @onchange="WarehouseSelectionChanged">
+                @if (warehouses != null)
+                {
+                    <option value="0">Select</option>
+                    @foreach (var warehouse in warehouses)
+                    {
+                        var _selected = warehouse.Id == headerInfo.WarehouseId;
+                        <option value="@warehouse.Id" selected="@_selected">@warehouse.Name</option>
+                    }
+                }
+            </Select>
+            <ValidationMessage For="@(()=> headerInfo.WarehouseId)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
         <label for="Deposit" class="col-md-2 col-form-label">Deposit:</label>
         <div>
             <InputNumber id="Deposit" class="form-control" @bind-Value="headerInfo.Deposit" />
@@ -70,7 +87,7 @@ else
                     <option value="0">Select</option>
                     @foreach (var product in products)
                         {
-                        <option value="@product.Id">@product.Name</option>
+                        <option value="@product.Id">@product.ProductName</option>
                         }
                     }
             </InputSelect>
@@ -98,26 +115,26 @@ else
             <tbody>
                 @foreach (var info in headerInfo.Items)
                 {
-                <tr>
-                    <td>@info.ProductName</td>
-                    <td>@info.ProductPrice</td>
-                    <td>@info.Quantity</td>
-                    <td>
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEditItem(info.Id))">Edit</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDeleteItem(info.Id))">Delete</a> |
-                    </td>
-                </tr>
+                    <tr>
+                        <td>@info.ProductName</td>
+                        <td>@info.ProductPrice</td>
+                        <td>@info.Quantity</td>
+                        <td>
+                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEditItem(info.Id))">Edit</a> |
+                            <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDeleteItem(info.Id))">Delete</a> |
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
         <ValidationMessage For="@(()=> headerInfo.Items)" />
     </div>
     <div class="col-12 row mt-2">
-        <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
-        <div>
-            <label class="form-control">@String.Format("{0:0.00}", headerInfo.Items.Sum(x => x.ProductPrice * x.Quantity))</label>
+            <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
+            <div>
+                <label class="form-control">@String.Format("{0:0.00} {1}", headerInfo.Items.Sum(x => x.ProductPrice * x.Quantity), _currencyCode)</label>
+            </div>
         </div>
-    </div>
     <div class="row mt-2">
         <div class="col-md-12 text-right">
             <button type="submit" class="btn btn-success">Save</button>
@@ -137,21 +154,25 @@ else
     private PreOrderItemInfo itemInfo;
 
     private List<CustomerInfo> customers;
-    private List<ProductInfo> products;
+    private List<WarehouseInfo> warehouses;
+    private List<WarehouseProductInfo> products;
     private string _imageData = string.Empty;
+    private string _currencyCode = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         headerInfo = new PreOrderHeaderInfo();
         itemInfo = new PreOrderItemInfo();
 
-        products = await Http.GetFromJsonAsync<List<ProductInfo>>($"api/product/get");
+        //products = await Http.GetFromJsonAsync<List<ProductInfo>>($"api/product/get");
+        warehouses = await Http.GetFromJsonAsync<List<WarehouseInfo>>($"api/warehouse/get");
         customers = await Http.GetFromJsonAsync<List<CustomerInfo>>($"api/customer/get");
 
         if (id > 0)
         {
             headerInfo = await Http.GetFromJsonAsync<PreOrderHeaderInfo>($"api/preorder/getheaderbyid/{id}");
             headerInfo.Items = await Http.GetFromJsonAsync<List<PreOrderItemInfo>>($"api/preorder/getitemsbyid/{id}");
+            _currencyCode = warehouses.Where(x => x.Id == headerInfo.WarehouseId).Select(x => x.CurrencyCode).FirstOrDefault();
         }
         else
         {
@@ -169,6 +190,19 @@ else
         NavigationManager.NavigateTo("/PreOrder/Index");
     }
 
+    async void WarehouseSelectionChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            var _newId = Convert.ToInt32(e.Value.ToString());
+            headerInfo.WarehouseId = _newId;
+            itemInfo = new PreOrderItemInfo();
+            headerInfo.Items = new List<PreOrderItemInfo>();
+            _currencyCode = warehouses.Where(x => x.Id == _newId).Select(x => x.CurrencyCode).FirstOrDefault();
+            products = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{_newId}");
+            StateHasChanged();
+        }
+    }
 
     void Back()
     {
@@ -192,7 +226,7 @@ else
         {
             var item = headerInfo.Items.Where(x => x.Id == itemInfo.Id).First();
             item.ProductId = itemInfo.ProductId;
-            item.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
+            item.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.ProductName).FirstOrDefault();
             item.Quantity = itemInfo.Quantity;
             item.ProductPrice = itemInfo.ProductPrice;
         }
@@ -201,8 +235,8 @@ else
             itemInfo.Id = GenerateId();
             itemInfo.HeaderId = id;
             var _product = products.Where(x => x.Id == itemInfo.ProductId).FirstOrDefault();
-            itemInfo.ProductName = _product.Name;
-            itemInfo.ProductPrice = _product.Price is null? 0 : (decimal)_product.Price;
+            itemInfo.ProductName = _product.ProductName;
+            itemInfo.ProductPrice = _product.Price;
             headerInfo.Items.Add(itemInfo);
         }
 

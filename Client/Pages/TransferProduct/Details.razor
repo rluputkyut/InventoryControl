@@ -51,7 +51,7 @@ else
             </dt>
 
             <dd>
-                @String.Format("{0:0.00}", transferProductHeader.Cost)
+                @String.Format("{0:0.00} {1}", transferProductHeader.Cost, _currencyCode)
             </dd>
 
             <dt>
@@ -98,7 +98,7 @@ else
 
     [Parameter]
     public int id { get; set; }
-
+    string _currencyCode { get; set; }
     private TransferProductHeaderInfo transferProductHeader;
 
     protected override async Task OnInitializedAsync()
@@ -110,6 +110,8 @@ else
         {
             transferProductHeader = await Http.GetFromJsonAsync<TransferProductHeaderInfo>($"api/transferproduct/getheaderbyid/{id}");
             transferProductHeader.Items = await Http.GetFromJsonAsync<List<TransferProductItemInfo>>($"api/transferproduct/getitemsbyid/{id}");
+            var _warehouse = await Http.GetFromJsonAsync<WarehouseInfo>($"api/warehouse/getbyid/{transferProductHeader.FromWarehouseId}");
+            _currencyCode = _warehouse.CurrencyCode;
         }
 
     }

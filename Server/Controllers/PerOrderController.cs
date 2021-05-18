@@ -69,6 +69,8 @@ namespace InventoryControl.Server.Controllers
                 _info.SoldOut = _product.SoldOut;
                 _info.OrderDate = _product.CreatedDate;
                 _info.WaitingDays = _product.WaitingDay;
+                _info.WarehouseId = _product.WarehouseId;
+                _info.WarehouseName = _dbContext.Warehouses.Where(x => x.Id == _product.WarehouseId).Select(x => x.Name).First();
                 _info.CustomerId = _product.CustomerId;
                 _info.CustomerName = _dbContext.Customers.Where(x => x.Id == _product.CustomerId).Select(x=>x.Name).First();
             }
@@ -94,7 +96,7 @@ namespace InventoryControl.Server.Controllers
                     ProductId = x.ProductId,
                     ProductName = _item.Name,
                     ProductCode = _item.Code,
-                    ProductPrice = _item.Price is null? 0 : (decimal) _item.Price,
+                    ProductPrice =x.OrderPrice,
                     Quantity = x.Quantity,
                 };
                 _list.Add(_info);
@@ -119,6 +121,7 @@ namespace InventoryControl.Server.Controllers
                     {
                         Code = info.Code,
                         CustomerId = info.CustomerId,
+                        WarehouseId = info.WarehouseId,
                         WaitingDay = info.WaitingDays,
                         Deposit = info.Deposit,
                         SoldOut = info.SoldOut,
@@ -136,6 +139,7 @@ namespace InventoryControl.Server.Controllers
                             HeaderId = _header.Id,
                             ProductId = item.ProductId,
                             Quantity = item.Quantity,
+                            OrderPrice = item.ProductPrice,
                             IsActive = true,
                             CreatedDate = DateTime.Now
                         };
@@ -171,6 +175,7 @@ namespace InventoryControl.Server.Controllers
 
                     _header.Code = info.Code;
                     _header.CustomerId = info.CustomerId;
+                    _header.WarehouseId = info.WarehouseId;
                     _header.Deposit = info.Deposit;
                     _header.WaitingDay = info.WaitingDays;
                     _header.SoldOut = info.SoldOut;
@@ -189,6 +194,7 @@ namespace InventoryControl.Server.Controllers
                             HeaderId = _header.Id,
                             ProductId = item.ProductId,
                             Quantity = item.Quantity,
+                            OrderPrice = item.ProductPrice,
                             IsActive = true,
                             CreatedDate = DateTime.Now
                         };

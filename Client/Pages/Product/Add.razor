@@ -67,14 +67,7 @@ else
             </InputSelect>
             <ValidationMessage For="@(()=> product.ProductTypeId)" />
         </div>
-    </div>
-    <div class="col-12 row mt-2">
-        <label for="Price" class="col-md-2 col-form-label">Price:</label>
-        <div>
-            <InputNumber id="Price" class="form-control" @bind-Value="product.Price" />
-            <ValidationMessage For="@(()=> product.Price)" />
-        </div>
-    </div>
+    </div>    
     <div class="col-12 row mt-2">
         <label for="Size" class="col-md-2 col-form-label">Size:</label>
         <div>

@@ -136,6 +136,8 @@ namespace InventoryControl.Server.Models
             {
                 entity.ToTable("Product");
 
+                entity.Property(e => e.BatchCode).HasMaxLength(50);
+
                 entity.Property(e => e.Code)
                     .IsRequired()
                     .HasMaxLength(100);
@@ -151,8 +153,6 @@ namespace InventoryControl.Server.Models
                     .HasMaxLength(1000);
 
                 entity.Property(e => e.Photo).HasColumnType("image");
-
-                entity.Property(e => e.Price).HasColumnType("money");
 
                 entity.Property(e => e.Size).HasColumnType("decimal(18, 2)");
 
@@ -249,6 +249,8 @@ namespace InventoryControl.Server.Models
                     .HasMaxLength(50);
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Discount).HasColumnType("money");
 
                 entity.Property(e => e.Remark).HasMaxLength(500);
 
@@ -352,6 +354,10 @@ namespace InventoryControl.Server.Models
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
+                entity.Property(e => e.CurrencyCode)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(500);
@@ -362,6 +368,8 @@ namespace InventoryControl.Server.Models
             modelBuilder.Entity<WarehouseProduct>(entity =>
             {
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Price).HasColumnType("money");
 
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
 

@@ -58,6 +58,17 @@ else
             <ValidationMessage For="@(()=> customer.AccountInformation)" />
         </div>
     </div>
+    <div class="col-12 row mt-2">
+        <label for="AccountInformation" class="col-md-2 col-form-label">Type:</label>
+        <div>
+            <InputSelect @bind-Value="customer.Type">
+                @foreach (var type in Enum.GetValues(typeof(CustomerType)))
+                    {
+                <option value="@type">@type.ToString()</option>
+                    }
+            </InputSelect>
+        </div>
+    </div>
     <div class="row mt-2">
         <div class="col-md-12 text-right">
             <button type="submit" class="btn btn-success">Save</button>

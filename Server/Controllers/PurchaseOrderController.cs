@@ -184,9 +184,9 @@ namespace InventoryControl.Server.Controllers
                     x.IsActive = false; 
                     x.UpdatedDate = DateTime.Now;
 
-                    if (_dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.WarehouseId && x.ProductId == x.ProductId && x.IsActive).Any())
+                    if (_dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.WarehouseId && y.ProductId == x.ProductId && y.IsActive).Any())
                     {
-                        var _product = _dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.WarehouseId && x.ProductId == x.ProductId && x.IsActive).First();
+                        var _product = _dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.WarehouseId && y.ProductId == x.ProductId && y.IsActive).First();
                         _product.Quantity -= x.Quantity;
                         _product.UpdatedDate = DateTime.Now;
                     }

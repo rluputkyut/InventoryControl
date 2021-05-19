@@ -75,6 +75,7 @@ namespace InventoryControl.Server.Controllers
                 _info.IsCOD = _header.CashOnDelivery;
                 _info.IsAccountTransfer = _header.AccountTransfer;
                 _info.TransferInfo = _header.TransferInformation;
+                _info.Discount = _header.Discount;
                 _info.SellingDate = _header.CreatedDate;
                 _info.WarehouseId = _header.WarehouseId;
                 _info.WarehouseName = _dbContext.Warehouses.Where(x => x.Id == _header.WarehouseId).Select(x => x.Name).First();
@@ -100,6 +101,59 @@ namespace InventoryControl.Server.Controllers
                     ProductName = _dbContext.Products.Where(z => z.Id == x.ProductId).Select(z => z.Name).FirstOrDefault(),
                     SellingPrice = x.SellingPrice,
                     OtherExpense = x.OtherExpense == null ? 0 : (decimal)x.OtherExpense,
+                    Quantity = x.Quantity,
+                };
+                _list.Add(_info);
+            });
+
+            return _list;
+        }
+
+        [HttpGet]
+        [Route("getheaderfrompreorder/{id}")]
+        public SaleOrderHeaderInfo GetHeaderFromPreOrder(int id)
+        {
+            SaleOrderHeaderInfo _info = new SaleOrderHeaderInfo();
+
+            if (_dbContext.PreOrderHeaders.Where(x => x.Id == id && x.IsActive).Any())
+            {
+                var _header = _dbContext.PreOrderHeaders.Where(x => x.Id == id && x.IsActive).First();
+                _info.Id = _header.Id;
+                _info.Code = _header.Code;
+                _info.CustomerId = _header.CustomerId;
+                _info.CustomerName = _dbContext.Customers.Where(x => x.Id == _header.CustomerId).Select(x => x.Name).First();
+                _info.Remark = _header.Remark+ "From PreOrder";
+                _info.Discount = _header.Deposit;
+                _info.Delivered = false;
+                _info.IsCOD = false;
+                _info.IsAccountTransfer = false;
+                _info.TransferInfo = string.Empty;
+                _info.SellingDate = _header.CreatedDate;
+                _info.WarehouseId = _header.WarehouseId;
+                _info.WarehouseName = _dbContext.Warehouses.Where(x => x.Id == _header.WarehouseId).Select(x => x.Name).First();
+            }
+            return _info;
+        }
+
+        [HttpGet]
+        [Route("getitemsfrompreorder/{id}")]
+        public List<SaleOrderItemInfo> GetItemsFromPreOrder(int id)
+        {
+            List<SaleOrderItemInfo> _list = new List<SaleOrderItemInfo>();
+
+            var _header = _dbContext.PreOrderHeaders.Where(x => x.Id == id && x.IsActive).First();
+            var _items = _dbContext.PreOrderItems.Where(x => x.HeaderId == id && x.IsActive).ToList();
+
+            _items.ForEach(x =>
+            {
+                SaleOrderItemInfo _info = new SaleOrderItemInfo()
+                {
+                    Id = x.Id,
+                    HeaderId = x.HeaderId,
+                    ProductId = x.ProductId,
+                    ProductName = _dbContext.Products.Where(z => z.Id == x.ProductId).Select(z => z.Name).FirstOrDefault(),
+                    SellingPrice = _dbContext.WarehouseProducts.Where(z=>z.WarehouseId == _header.WarehouseId && z.ProductId == x.ProductId && z.IsActive).Select(z=>z.Price).FirstOrDefault(),
+                    OtherExpense = 0,
                     Quantity = x.Quantity,
                 };
                 _list.Add(_info);
@@ -164,6 +218,15 @@ namespace InventoryControl.Server.Controllers
                         _dbContext.SaveChanges();
                     }
 
+                    if (_dbContext.PreOrderHeaders.Where(x => x.Id == info.PreOrderId && x.IsActive).Any())
+                    {
+                        var _preOrder = _dbContext.PreOrderHeaders.Where(x => x.Id == info.PreOrderId && x.IsActive).First();
+                        _id = _header.Id;
+                        _preOrder.SoldOut = true;
+                        _preOrder.UpdatedDate = DateTime.Now;
+                        _dbContext.SaveChanges();
+                    }
+
                     transaction.Commit();
                     _id = _header.Id;
                 }
@@ -212,9 +275,9 @@ namespace InventoryControl.Server.Controllers
                     x.IsActive = false;
                     x.UpdatedDate = DateTime.Now;
 
-                    if (_dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.WarehouseId && x.ProductId == x.ProductId && x.IsActive).Any())
+                    if (_dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.WarehouseId && y.ProductId == x.ProductId && y.IsActive).Any())
                     {
-                        var _product = _dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.WarehouseId && x.ProductId == x.ProductId && x.IsActive).First();
+                        var _product = _dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.WarehouseId && y.ProductId == x.ProductId && y.IsActive).First();
                         _product.Quantity += x.Quantity;
                         _product.UpdatedDate = DateTime.Now;
                     }

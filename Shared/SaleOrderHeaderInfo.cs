@@ -37,8 +37,12 @@ namespace InventoryControl.Shared
         public DateTime SellingDate { get; set; }
         public bool Delivered { get; set; }
 
+        public decimal Discount { get; set; }
+
         [Required(ErrorMessage = "Products are Required!"), MinLength(1, ErrorMessage = "Products are Required!")]
         public List<SaleOrderItemInfo> Items { get; set; }
+
+        public int PreOrderId { get; set; }
     }
 
     public class SaleOrderItemInfo

@@ -25,6 +25,7 @@ else
                 <th>Code</th>
                 <th>Order Date</th>
                 <th>Customer</th>
+                <th>Warehouse</th>
                 <th>Waiting Days</th>
                 <th>Status</th>
                 <th></th>
@@ -37,6 +38,7 @@ else
                 <td>@info.Code</td>
                 <td>@info.OrderDate</td>
                 <td>@info.CustomerName</td>
+                <td>@info.WarehouseName</td>
                 <td>@info.WaitingDays</td>
                 @if (info.SoldOut)
                 {
@@ -47,12 +49,18 @@ else
                     <td>Pending</td>
                 }
             <td>
-                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnChangeStatus(info))">ChangeStatus</a> |
-                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                @{
+                    if (!info.SoldOut)
+                    {
+                        string _text = @" | ";
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnChangeStatus(info))">ChangeStatus</a> @_text
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> @_text
+                    }
+                }
                 <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
                 <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
             </td>
-                </tr>
+            </tr>
             }
         </tbody>
     </table>
@@ -107,12 +115,15 @@ else
         if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to change the Status to '{_status}' for {info.Code}?"))
             return;
 
-        info.SoldOut = !info.SoldOut;
+        //info.SoldOut = !info.SoldOut;
 
-        var result = await Http.GetFromJsonAsync<int>($"api/preorder/updatestatus/{info.Id}/{info.SoldOut}");
+        var result = await Http.GetFromJsonAsync<int>($"api/preorder/checkstatus/{info.Id}");
 
         if (result > 0)
-            await LoadForm();
+            NavigationManager.NavigateTo($"/SaleOrder/AddPreorder/{info.Id}");
+        else
+            await JSRuntime.InvokeVoidAsync("alert", $"Products are not enought to sale!");
+        //await LoadForm();
     }
 
     private async Task LoadForm()

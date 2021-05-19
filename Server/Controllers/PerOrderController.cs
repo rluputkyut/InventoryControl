@@ -43,7 +43,9 @@ namespace InventoryControl.Server.Controllers
                     WaitingDays = x.WaitingDay,
                     SoldOut = x.SoldOut,
                     CustomerId = x.CustomerId,
-                    CustomerName = _dbContext.Customers.Where(y => y.Id == x.CustomerId).Select(y => y.Name).First()
+                    CustomerName = _dbContext.Customers.Where(y => y.Id == x.CustomerId).Select(y => y.Name).First(),
+                    WarehouseId = x.WarehouseId,
+                    WarehouseName = _dbContext.Warehouses.Where(y => y.Id == x.WarehouseId).Select(y => y.Name).First()
                 };
                 _list.Add(_info);
             });
@@ -216,16 +218,52 @@ namespace InventoryControl.Server.Controllers
         }
 
         [HttpGet]
-        [Route("updatestatus/{id}/{soldOut}")]
-        public int UpdateStatus(int id, bool soldOut)
+        [Route("checkstatus/{id}")]
+        public int CheckStatus(int id)
         {
             int _id = 0;
 
             if (_dbContext.PreOrderHeaders.Where(x => x.Id ==id && x.IsActive).Any())
             {
                 var _header = _dbContext.PreOrderHeaders.Where(x => x.Id ==id && x.IsActive).First();
+                var _items = _dbContext.PreOrderItems.Where(x => x.HeaderId == _header.Id && x.IsActive).ToList();
+
+                foreach (PreOrderItem _item in _items)
+                {
+                    if (_dbContext.WarehouseProducts.Where(x => x.ProductId == _item.ProductId && x.WarehouseId == _header.WarehouseId && x.IsActive).Any())
+                    {
+                        var _product = _dbContext.WarehouseProducts.Where(x => x.ProductId == _item.ProductId && x.WarehouseId == _header.WarehouseId && x.IsActive).FirstOrDefault();
+
+                        if (_product.Quantity >= _item.Quantity)
+                            _id = _header.Id;
+                        else
+                        {
+                            _id = 0;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        _id = 0;
+                        break;
+                    }
+                }
+            }
+
+            return _id;
+        }
+
+        [HttpPut]
+        [Route("updatestatus")]
+        public int UpdateStatus(PreOrderHeaderInfo info)
+        {
+            int _id = 0;
+
+            if (_dbContext.PreOrderHeaders.Where(x => x.Id == info.Id && x.IsActive).Any())
+            {
+                var _header = _dbContext.PreOrderHeaders.Where(x => x.Id == info.Id && x.IsActive).First();
                 _id = _header.Id;
-                _header.SoldOut =soldOut;
+                _header.SoldOut = true;
                 _header.UpdatedDate = DateTime.Now;
                 _dbContext.SaveChanges();
             }

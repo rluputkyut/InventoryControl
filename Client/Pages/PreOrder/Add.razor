@@ -40,7 +40,7 @@ else
         </div>
     </div>
     <div class="col-12 row mt-2">
-        <label for="customerId" class="col-md-2 col-form-label">Customer:</label>
+        <label for="WarehouseId" class="col-md-2 col-form-label">Customer:</label>
         <div>
             <Select id="WarehouseId" class="form-control" @onchange="WarehouseSelectionChanged">
                 @if (warehouses != null)
@@ -87,7 +87,7 @@ else
                     <option value="0">Select</option>
                     @foreach (var product in products)
                         {
-                        <option value="@product.Id">@product.ProductName</option>
+                        <option value="@product.ProductId">@product.ProductName</option>
                         }
                     }
             </InputSelect>
@@ -172,6 +172,7 @@ else
         {
             headerInfo = await Http.GetFromJsonAsync<PreOrderHeaderInfo>($"api/preorder/getheaderbyid/{id}");
             headerInfo.Items = await Http.GetFromJsonAsync<List<PreOrderItemInfo>>($"api/preorder/getitemsbyid/{id}");
+            products = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{headerInfo.WarehouseId}");
             _currencyCode = warehouses.Where(x => x.Id == headerInfo.WarehouseId).Select(x => x.CurrencyCode).FirstOrDefault();
         }
         else

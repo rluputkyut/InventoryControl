@@ -183,8 +183,8 @@ namespace InventoryControl.Server.Controllers
                 _info.BatchCode = info.BatchCode;
                 _info.Photo = string.IsNullOrEmpty(info.Photo) ? _info.Photo : Convert.FromBase64String(info.Photo);
                 _info.Size = info.Size == null ? info.Size : _info.Size;
-                _info.ExpiredDate = info.ExpiredDate == null ? info.ExpiredDate : _info.ExpiredDate;
-                _info.ManufactureDate = info.ManufactureDate == null ? info.ManufactureDate : _info.ManufactureDate;
+                _info.ExpiredDate = info.ExpiredDate != null ? info.ExpiredDate : _info.ExpiredDate;
+                _info.ManufactureDate = info.ManufactureDate != null ? info.ManufactureDate : _info.ManufactureDate;
                 _info.UpdatedDate = DateTime.Now;
                 _result = _dbContext.SaveChanges() > 0;
             }

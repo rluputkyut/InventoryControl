@@ -83,7 +83,7 @@ else
     <div class="row col-md-12 mt-2">
         <div class="col-md-2">
             <label>Product:</label>
-            <InputSelect id="ProductId" class="form-control" @bind-Value="itemInfo.ProductId">
+            @*<InputSelect id="ProductId" class="form-control" @bind-Value="itemInfo.ProductId">
                 @if (products != null)
                     {
                     <option value="0">Select</option>
@@ -92,7 +92,18 @@ else
                         <option value="@product.ProductId">@product.ProductName</option>
                         }
                     }
-            </InputSelect>
+            </InputSelect>*@
+            <Select id="ProductId" class="form-control" @onchange="ProductSelectionChanged">
+                @if (products != null)
+                {
+                    <option value="0">Select</option>
+                    @foreach (var product in products)
+                    {
+                        var _selected = product.ProductId == itemInfo.ProductId;
+                        <option value="@product.ProductId" selected="@_selected">@product.ProductName</option>
+                    }
+                }
+            </Select>
         </div>
         <div class="col-md-2">
             <label>Quantity:</label>
@@ -145,7 +156,7 @@ else
     <div class="col-12 row mt-2">
         <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
         <div>
-            <label class="form-control">@String.Format("{0:0.00}", headerInfo.Items.Sum(x => (x.SellingPrice - x.OtherExpense) * x.Quantity))</label>
+            <label class="form-control">@String.Format("{0:0.00} {1}", headerInfo.Items.Sum(x => (x.SellingPrice - x.OtherExpense) * x.Quantity), _currencyCode)</label>
         </div>
     </div>
     <div class="row mt-2">
@@ -165,7 +176,7 @@ else
 
     private SaleOrderHeaderInfo headerInfo;
     private SaleOrderItemInfo itemInfo;
-
+    string _currencyCode { get; set; }
     private List<WarehouseInfo> warehouses;
     private List<CustomerInfo> customers;
     private List<WarehouseProductInfo> products;
@@ -205,6 +216,18 @@ else
             itemInfo = new SaleOrderItemInfo();
             headerInfo.Items = new List<SaleOrderItemInfo>();
             products = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{_newId}");
+            _currencyCode = warehouses.Where(x => x.Id == headerInfo.WarehouseId).Select(x => x.CurrencyCode).FirstOrDefault();
+            StateHasChanged();
+        }
+    }
+
+    void ProductSelectionChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            var _newId = Convert.ToInt32(e.Value.ToString());
+            itemInfo.ProductId = _newId;
+            itemInfo.SellingPrice = products.Where(x => x.Id == _newId).Select(x => x.Price).FirstOrDefault();
             StateHasChanged();
         }
     }

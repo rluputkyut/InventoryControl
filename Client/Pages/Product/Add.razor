@@ -67,12 +67,19 @@ else
             </InputSelect>
             <ValidationMessage For="@(()=> product.ProductTypeId)" />
         </div>
-    </div>    
+    </div>
     <div class="col-12 row mt-2">
         <label for="Size" class="col-md-2 col-form-label">Size:</label>
         <div>
             <InputNumber id="Size" class="form-control" @bind-Value="product.Size" />
             <ValidationMessage For="@(()=> product.Size)" />
+        </div>
+    </div>
+    <div class="col-12 row mt-2">
+        <label for="BatchCode" class="col-md-2 col-form-label">BatchCode:</label>
+        <div>
+            <InputText id="BatchCode" class="form-control" @bind-Value="product.BatchCode" />
+            <ValidationMessage For="@(()=> product.BatchCode)" />
         </div>
     </div>
     <div class="col-12 row mt-2">

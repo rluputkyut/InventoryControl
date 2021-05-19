@@ -27,117 +27,118 @@ else
                 <th>Warehouse</th>
                 <th>Customer</th>
                 @*<th>Payment Type</th>*@
-                <th>Remark</th>
+                <th>Status</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var info in orders)
             {
-                <tr>
-                    <td>@info.Code</td>
-                    <td>@info.SellingDate</td>
-                    <td>@info.WarehouseName</td>
-                    <td>@info.CustomerName</td>
-                    @*<td>@(info.IsCOD? "Cash On Delivery" : $"Account Info:{info.TransferInfo}" )</td>*@
-                    <td>@info.Remark</td>
-                    <td>
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnChangeStatus(info))">ChangeStatus</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <div class="row">
-        <div class="col">
-            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
-        </div>
-    </div>
-}
-
-@code {
-    public MetaData MetaData { get; set; } = new MetaData();
-    private PageParameters _pageParameters = new PageParameters();
-    private List<SaleOrderHeaderInfo> orders;
-
-    void OnAddNew()
-    {
-        NavigationManager.NavigateTo("/SaleOrder/Add");
-    }
-
-    void OnDetails(int id)
-    {
-        NavigationManager.NavigateTo($"/SaleOrder/Details/{id}");
-    }
-
-    async void OnDelete(SaleOrderHeaderInfo info)
-    {
-        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the Sale Order Info '{info.Code}'?"))
-            return;
-
-        var result = await Http.DeleteAsync("api/saleorder/delete/" + info.Id);
-
-        if (result.IsSuccessStatusCode)
-            await LoadForm();
-    }
-
-    private async Task LoadForm()
-    {
-        await Task.Delay(500);
-
-        await GetData(_pageParameters);
-
-        StateHasChanged();
-    }
-
-    private async Task SelectedPage(int page)
-    {
-        _pageParameters.PageNumber = page;
-        await GetData(_pageParameters);
-    }
-
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    orders = await Http.GetFromJsonAsync<List<SaleOrderHeaderInfo>>("api/saleorder/getheaders");
-    //}
-
-    async void OnChangeStatus(SaleOrderHeaderInfo info)
-    {
-        var _status = info.Delivered ? "Pending" : "Delivered";
-
-        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to change the Status to '{_status}' for {info.Code}?"))
-            return;
-
-        info.Delivered = !info.Delivered;
-
-        var result = await Http.GetFromJsonAsync<int>($"api/saleorder/updatestatus/{info.Id}/{info.Delivered}");
-
-        if (result > 0)
-            await LoadForm();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
-
-        if (firstRender)
-        {
-            await LoadForm();
-
-            StateHasChanged();
+            <tr>
+                <td>@info.Code</td>
+                <td>@info.SellingDate</td>
+                <td>@info.WarehouseName</td>
+                <td>@info.CustomerName</td>
+                @*<td>@(info.IsCOD? "Cash On Delivery" : $"Account Info:{info.TransferInfo}" )</td>
+                    <td>@info.Remark</td>*@
+                <td>@(info.Delivered? "Delivered": "Pending")</td>
+                <td>
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnChangeStatus(info))">ChangeStatus</a> |
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+                </td>
+            </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col">
+                    <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+                </div>
+            </div>
         }
 
-        await base.OnAfterRenderAsync(firstRender);
-    }
+        @code {
+            public MetaData MetaData { get; set; } = new MetaData();
+            private PageParameters _pageParameters = new PageParameters();
+            private List<SaleOrderHeaderInfo> orders;
 
-    async Task GetData(PageParameters parameters)
-    {
-        var response = await Http.GetFromJsonAsync<SaleOrderHeaderList>($"api/saleorder/getheaders?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+            void OnAddNew()
+            {
+                NavigationManager.NavigateTo("/SaleOrder/Add");
+            }
 
-        orders = response.Items;
-        MetaData = response.Meta;
-    }
+            void OnDetails(int id)
+            {
+                NavigationManager.NavigateTo($"/SaleOrder/Details/{id}");
+            }
 
-}
+            async void OnDelete(SaleOrderHeaderInfo info)
+            {
+                if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the Sale Order Info '{info.Code}'?"))
+                    return;
+
+                var result = await Http.DeleteAsync("api/saleorder/delete/" + info.Id);
+
+                if (result.IsSuccessStatusCode)
+                    await LoadForm();
+            }
+
+            private async Task LoadForm()
+            {
+                await Task.Delay(500);
+
+                await GetData(_pageParameters);
+
+                StateHasChanged();
+            }
+
+            private async Task SelectedPage(int page)
+            {
+                _pageParameters.PageNumber = page;
+                await GetData(_pageParameters);
+            }
+
+            //protected override async Task OnInitializedAsync()
+            //{
+            //    orders = await Http.GetFromJsonAsync<List<SaleOrderHeaderInfo>>("api/saleorder/getheaders");
+            //}
+
+            async void OnChangeStatus(SaleOrderHeaderInfo info)
+            {
+                var _status = info.Delivered ? "Pending" : "Delivered";
+
+                if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to change the Status to '{_status}' for {info.Code}?"))
+                    return;
+
+                info.Delivered = !info.Delivered;
+
+                var result = await Http.GetFromJsonAsync<int>($"api/saleorder/updatestatus/{info.Id}/{info.Delivered}");
+
+                if (result > 0)
+                    await LoadForm();
+            }
+
+            protected override async Task OnAfterRenderAsync(bool firstRender)
+            {
+                Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+                if (firstRender)
+                {
+                    await LoadForm();
+
+                    StateHasChanged();
+                }
+
+                await base.OnAfterRenderAsync(firstRender);
+            }
+
+            async Task GetData(PageParameters parameters)
+            {
+                var response = await Http.GetFromJsonAsync<SaleOrderHeaderList>($"api/saleorder/getheaders?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+
+                orders = response.Items;
+                MetaData = response.Meta;
+            }
+
+        }

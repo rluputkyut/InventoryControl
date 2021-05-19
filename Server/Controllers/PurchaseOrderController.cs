@@ -88,7 +88,6 @@ namespace InventoryControl.Server.Controllers
                     ProductId = x.ProductId,
                     ProductName = _dbContext.Products.Where(z => z.Id == x.ProductId).Select(z => z.Name).FirstOrDefault(),
                     BuyingPrice = x.BuyingPrice,
-                    Currency = x.Currency,
                     Quantity = x.Quantity,
                 };
                 _list.Add(_info);
@@ -128,8 +127,7 @@ namespace InventoryControl.Server.Controllers
                             HeaderId = _header.Id,
                             ProductId = item.ProductId,
                             Quantity = item.Quantity,
-                            BuyingPrice = item.BuyingPrice,
-                            Currency = item.Currency,                            
+                            BuyingPrice = item.BuyingPrice,                 
                             IsActive = true,
                             CreatedDate = DateTime.Now
                         };

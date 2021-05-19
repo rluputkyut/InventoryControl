@@ -62,6 +62,7 @@ else
             <div>
                 <InputNumber id="Cost" class="form-control" @bind-Value="transferProductHeader.Cost" />
                 <ValidationMessage For="@(()=> transferProductHeader.Cost)" />
+                @_currencyCode
             </div>
         </div>
         <div class="col-12 row mt-2">
@@ -135,7 +136,7 @@ else
     [Parameter]
     public int id { get; set; }
     bool isItemEdit;
-
+    string _currencyCode { get; set; }
     private TransferProductHeaderInfo transferProductHeader;
     private TransferProductItemInfo transferProductItem;
 
@@ -153,6 +154,7 @@ else
         {
             transferProductHeader = await Http.GetFromJsonAsync<TransferProductHeaderInfo>($"api/transferproduct/getheaderbyid/{id}");
             transferProductHeader.Items = await Http.GetFromJsonAsync<List<TransferProductItemInfo>>($"api/transferproduct/getitemsbyid/{id}");
+            _currencyCode = warehouses.Where(x => x.Id == transferProductHeader.FromWarehouseId).Select(x => x.CurrencyCode).FirstOrDefault();
         }
         else
         {
@@ -187,6 +189,7 @@ else
             var _newId = Convert.ToInt32(e.Value.ToString());
             transferProductHeader.FromWarehouseId = _newId;
             products = await Http.GetFromJsonAsync<List<WarehouseProductInfo>>($"api/warehouseproducts/getbywarehouseid/{transferProductHeader.FromWarehouseId}");
+            _currencyCode = warehouses.Where(x => x.Id == transferProductHeader.FromWarehouseId).Select(x => x.CurrencyCode).FirstOrDefault();
             StateHasChanged();
         }
     }

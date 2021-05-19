@@ -25,9 +25,9 @@ else
                     <th></th>
                     <th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
                     <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
-                    <th>BrandName <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "brand"))" /></th>
-                    <th>ProductTypeName <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "productType"))" /></th>
-                    <th>BatchCode</th>
+                    <th>Brand <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "brand"))" /></th>
+                    <th>ProductType <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "productType"))" /></th>
+                    <th>Batch</th>
                     <th>Manufactured</th>
                     <th>Expired</th>
                     <th></th>
@@ -43,15 +43,15 @@ else
                     }
                     else
                     {
-                        <td><img class="rounded m-0 h-50" src="@string.Format($"data:png;base64,{info.Photo}")" /></td>
+                        <td><img class="rounded m-0 h-auto w-auto" src="@string.Format($"data:png;base64,{info.Photo}")" /></td>
                     }
                     <td>@info.Code</td>
                     <td>@info.Name</td>
                     <td>@info.BrandName</td>
                     <td>@info.ProductTypeName</td>
-                    <td>@info.BatchCode</td>
-                    <td>@info.ManufactureDate</td>
-                    <td>@info.ExpiredDate</td>
+                    <td>@info.BatchCode</td> 
+                    <td>@(info.ManufactureDate == null? string.Empty : info.ManufactureDate.Value.Date.ToString("yyyyy-MM-dd"))</td>
+                    <td>@(info.ExpiredDate == null? string.Empty : info.ExpiredDate.Value.Date.ToString("yyyyy-MM-dd"))</td>
                     <td>
                         <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
                         <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>

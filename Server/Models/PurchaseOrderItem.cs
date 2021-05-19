@@ -12,7 +12,6 @@ namespace InventoryControl.Server.Models
         public int ProductId { get; set; }
         public int Quantity { get; set; }
         public decimal BuyingPrice { get; set; }
-        public string Currency { get; set; }
         public DateTime CreatedDate { get; set; }
         public bool IsActive { get; set; }
         public DateTime? UpdatedDate { get; set; }

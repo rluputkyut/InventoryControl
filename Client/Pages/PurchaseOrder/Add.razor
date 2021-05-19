@@ -75,11 +75,7 @@ else
         <div class="col-md-2">
             <label>Buying Price:</label>
             <InputNumber id="BuyingPrice" class="form-control" @bind-Value="itemInfo.BuyingPrice" />
-        </div>
-        <div class="col-md-2">
-            <label>Currency:</label>
-            <InputText id="Currency" class="form-control" @bind-Value="itemInfo.Currency" />
-        </div>
+        </div>       
         <div class="col-md-8 text-right mt-2">
             <label> </label>
             <button type="button" class="btn btn-primary" @onclick="@AddItem">Add</button>
@@ -94,7 +90,6 @@ else
                     <th>Product</th>
                     <th>Quantity</th>
                     <th>Buying Price</th>
-                    <th>Currency</th>
                     <th></th>
                 </tr>
             </thead>
@@ -105,7 +100,6 @@ else
                         <td>@info.ProductName</td>
                         <td>@info.Quantity</td>
                         <td>@String.Format("{0:0.00}", info.BuyingPrice)</td>
-                        <td>@info.Currency</td>
                         <td>
                             <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEditItem(info.Id))">Edit</a> |
                             <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDeleteItem(info.Id))">Delete</a> |
@@ -119,7 +113,7 @@ else
     <div class="col-12 row mt-2">
         <label for="TotalAmount" class="col-md-2 col-form-label">Tota lAmount:</label>
         <div>
-            <label class="form-control">@String.Format("{0:0.00}", headerInfo.Items.Sum(x => x.BuyingPrice * x.Quantity))</label>
+            <label class="form-control">@String.Format("{0:0.00} {1}", headerInfo.Items.Sum(x => x.BuyingPrice * x.Quantity), _currencyCode)</label>
         </div>
     </div>
     <div class="row mt-2">
@@ -139,7 +133,7 @@ else
 
     private PurchaseOrderHeaderInfo headerInfo;
     private PurchaseOrderItemInfo itemInfo;
-
+    string _currencyCode { get; set; }
     private List<WarehouseInfo> warehouses;
     private List<ProductInfo> products;
 
@@ -169,7 +163,7 @@ else
 
     async void AddItem()
     {
-        if (itemInfo.ProductId == 0 || itemInfo.Quantity <= 0 || itemInfo.BuyingPrice < 0|| string.IsNullOrEmpty(itemInfo.Currency))
+        if (itemInfo.ProductId == 0 || itemInfo.Quantity <= 0 || itemInfo.BuyingPrice < 0)
         {
             await JSRuntime.InvokeVoidAsync("alert", $"Invalid Data!");
             return;
@@ -186,12 +180,14 @@ else
             item.ProductId = itemInfo.ProductId;
             item.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
             item.Quantity = itemInfo.Quantity;
+            _currencyCode = warehouses.Where(x=>x.Id == headerInfo.WarehouseId).Select(x=>x.CurrencyCode).FirstOrDefault();
         }
         else
         {
             itemInfo.Id = GenerateId();
             itemInfo.HeaderId = id;
             itemInfo.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.Name).FirstOrDefault();
+            _currencyCode = warehouses.Where(x => x.Id == headerInfo.WarehouseId).Select(x => x.CurrencyCode).FirstOrDefault();
             headerInfo.Items.Add(itemInfo);
         }
 

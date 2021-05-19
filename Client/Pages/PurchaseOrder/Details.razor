@@ -68,27 +68,21 @@ else
                 <th>
                     Buying Price
                 </th>
-                <th>
-                    Currency
-                </th>
             </tr>
 
             @foreach (var item in headerOrder.Items)
             {
-        <tr>
-            <td>
-                @item.ProductName
-            </td>
-            <td>
-                @item.Quantity
-            </td>
-            <td>
-                @String.Format("{0:0.00}", item.BuyingPrice)
-            </td>
-            <td>
-                @item.Currency
-            </td>
-        </tr>
+            <tr>
+                <td>
+                    @item.ProductName
+                </td>
+                <td>
+                    @item.Quantity
+                </td>
+                <td>
+                    @String.Format("{0:0.00}", item.BuyingPrice)
+                </td>
+            </tr>
             }
 
         </table>

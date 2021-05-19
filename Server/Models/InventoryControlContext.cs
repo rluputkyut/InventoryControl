@@ -221,10 +221,6 @@ namespace InventoryControl.Server.Models
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Currency)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.Header)

@@ -19,7 +19,7 @@ else
         <button class="btn btn-primary" @onclick="OnAddNew">Create New Customer</button>
     </p>
 
-    <table class="table col-lg-10 col-md-10 col-sm-10">
+    <table class="table col-lg-12col-md-12 col-sm-12">
         <thead>
             <tr>
                 <th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
@@ -27,7 +27,7 @@ else
                 <th>Nick Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "nickName"))" /></th>
                 <th>Phone No<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "phoneNo"))" /></th>
                 <th>Address<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "address"))" /></th>
-                <th>Account Information<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "account"))" /></th>
+                <th>Account<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "account"))" /></th>
                 <th>Type </th>
                 <th></th>
             </tr>

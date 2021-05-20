@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace InventoryControl.Shared
 {
-    public class TransferProductHeaderList
+    public class DamagedProductHeaderList
     {
-        public List<TransferProductHeaderInfo> Items { get; set; }
+        public List<DamagedProductHeaderInfo> Items { get; set; }
         public MetaData Meta { get; set; }
     }
-    public class TransferProductHeaderInfo
+    public class DamagedProductHeaderInfo
     {
         public int Id { get; set; }
 
@@ -21,28 +21,22 @@ namespace InventoryControl.Shared
         public string Code { get; set; }
 
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "From Warehouse is Required!")]
-        public int FromWarehouseId { get; set; }
-        public string FromWarehouseName { get; set; }
-
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "To Warehouse is Required!")]
-        public int ToWarehouseId { get; set; }
-        public string ToWarehouseName { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Warehouse is Required!")]
+        public int WarehouseId { get; set; }
+        public string WarehouseName { get; set; }
+                
 
         [Required(ErrorMessage = "Cost is Required!")]
         [Range(0, int.MaxValue, ErrorMessage = "Invalid Value!")]
         public decimal Cost { get; set; }
         public string Remark { get; set; }
-        public DateTime TransferDate { get; set; }
-        public bool Received { get; set; }
-        public DateTime? ReceivedDate { get; set; }
+        public DateTime DamagedDate { get; set; }
 
-        [Required(ErrorMessage = "Products are Required!"), MinLength(1,ErrorMessage = "Products are Required!")]
-        public List<TransferProductItemInfo> Items { get; set; }
+        [Required(ErrorMessage = "Products are Required!"), MinLength(1, ErrorMessage = "Products are Required!")]
+        public List<DamagedProductItemInfo> Items { get; set; }
     }
 
-    public class TransferProductItemInfo
+    public class DamagedProductItemInfo
     {
         public int Id { get; set; }
         public int HeaderId { get; set; }
@@ -56,6 +50,6 @@ namespace InventoryControl.Shared
         //[Required(ErrorMessage = "Qiantity is Required!")]
         //[Range(1, int.MaxValue, ErrorMessage = "Invalid Value!")]
         public int Quantity { get; set; }
-       
+
     }
 }

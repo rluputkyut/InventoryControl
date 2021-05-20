@@ -19,6 +19,8 @@ namespace InventoryControl.Server.Models
 
         public virtual DbSet<Brand> Brands { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
+        public virtual DbSet<DamagedProductHeader> DamagedProductHeaders { get; set; }
+        public virtual DbSet<DamagedProductItem> DamagedProductItems { get; set; }
         public virtual DbSet<PreOrderHeader> PreOrderHeaders { get; set; }
         public virtual DbSet<PreOrderItem> PreOrderItems { get; set; }
         public virtual DbSet<Product> Products { get; set; }
@@ -86,6 +88,46 @@ namespace InventoryControl.Server.Models
                 entity.Property(e => e.PhoneNo).HasMaxLength(50);
 
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<DamagedProductHeader>(entity =>
+            {
+                entity.ToTable("DamagedProductHeader");
+
+                entity.Property(e => e.Code)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Cost).HasColumnType("money");
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Remark)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<DamagedProductItem>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Header)
+                    .WithMany(p => p.DamagedProductItems)
+                    .HasForeignKey(d => d.HeaderId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ReceivedProductItems_ReceivedProductHeader");
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.DamagedProductItems)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ReceivedProductItems_Product");
             });
 
             modelBuilder.Entity<PreOrderHeader>(entity =>
@@ -301,6 +343,8 @@ namespace InventoryControl.Server.Models
                 entity.Property(e => e.Cost).HasColumnType("money");
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ReceivedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Remark)
                     .IsRequired()

@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace InventoryControl.Server.Models
 {
-    public partial class TransferProductHeader
+    public partial class ReceivedProductHeader
     {
-        public TransferProductHeader()
+        public ReceivedProductHeader()
         {
-            TransferProductItems = new HashSet<TransferProductItem>();
+            ReceivedProductItems = new HashSet<ReceivedProductItem>();
         }
 
         public int Id { get; set; }
@@ -18,14 +18,10 @@ namespace InventoryControl.Server.Models
         public int ToWarehouseId { get; set; }
         public decimal Cost { get; set; }
         public string Remark { get; set; }
-        public bool Received { get; set; }
-        public DateTime? ReceivedDate { get; set; }
         public DateTime CreatedDate { get; set; }
         public bool IsActive { get; set; }
         public DateTime? UpdatedDate { get; set; }
 
-        public virtual Warehouse FromWarehouse { get; set; }
-        public virtual Warehouse ToWarehouse { get; set; }
-        public virtual ICollection<TransferProductItem> TransferProductItems { get; set; }
+        public virtual ICollection<ReceivedProductItem> ReceivedProductItems { get; set; }
     }
 }

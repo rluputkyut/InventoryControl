@@ -42,8 +42,10 @@ namespace InventoryControl.Server.Controllers
                     ToWarehouseId = x.ToWarehouseId,
                     ToWarehouseName = _warehouses.Where(z => z.Id == x.ToWarehouseId).Select(z => z.Name).FirstOrDefault(),
                     Remark = x.Remark,
+                    Received = x.Received,
                     Cost = x.Cost,
-                    TransferDate = x.CreatedDate
+                    TransferDate = x.CreatedDate,
+                    ReceivedDate = x.ReceivedDate,
                 };
                 _list.Add(_info);
             });
@@ -72,7 +74,9 @@ namespace InventoryControl.Server.Controllers
                 _info.ToWarehouseName = _warehouses.Where(z => z.Id == _product.ToWarehouseId).Select(z => z.Name).FirstOrDefault();
                 _info.Remark = _product.Remark;
                 _info.Cost = _product.Cost;
+                _info.Received = _product.Received;
                 _info.TransferDate = _product.CreatedDate;
+                _info.ReceivedDate = _product.ReceivedDate;
             }
             return _info;
         }
@@ -120,6 +124,7 @@ namespace InventoryControl.Server.Controllers
                         ToWarehouseId = info.ToWarehouseId,
                         Cost = info.Cost,
                         Remark = info.Remark,
+                        Received = false,
                         IsActive = true,
                         CreatedDate = DateTime.Now
                     };
@@ -212,6 +217,64 @@ namespace InventoryControl.Server.Controllers
             return _id;
         }
 
+        [HttpGet]
+        [Route("updatestatus/{id}/{received}")]
+        public int UpdateStatus(int id, bool received)
+        {
+            int _id = 0;
+            using var transaction = _dbContext.Database.BeginTransaction();
+
+            try
+            {
+                if (_dbContext.TransferProductHeaders.Where(x => x.Id == id && x.IsActive).Any())
+                {
+                    var _header = _dbContext.TransferProductHeaders.Where(x => x.Id == id && x.IsActive).First();
+                    _id = _header.Id;
+                    _header.Received = received;
+                    _header.UpdatedDate = DateTime.Now;
+                    _header.ReceivedDate = received ? DateTime.Now : null;
+                    _dbContext.SaveChanges();
+
+                    var _oldItems = _dbContext.TransferProductItems.Where(x => x.HeaderId == id && x.IsActive).ToList();
+                    _oldItems.ForEach(x =>
+                    {
+                        if (_dbContext.WarehouseProducts.Where(y => y.WarehouseId == _header.ToWarehouseId && y.ProductId == x.ProductId && y.IsActive).Any())
+                        {
+                            var _product = _dbContext.WarehouseProducts.Where(y => y.WarehouseId == _header.ToWarehouseId && y.ProductId == x.ProductId && y.IsActive).First();
+
+                            if (received)
+                                _product.Quantity += x.Quantity;
+                            else
+                                _product.Quantity -= x.Quantity;
+                            _product.UpdatedDate = DateTime.Now;
+                        }
+                        else if(received)
+                        {
+                            _dbContext.WarehouseProducts.Add(new WarehouseProduct() 
+                            {                                
+                                ProductId = x.ProductId,
+                                WarehouseId = _header.ToWarehouseId,
+                                Quantity = x.Quantity,
+                                Price = 0,
+                                IsActive = true,
+                                CreatedDate = DateTime.Now                                
+                            });
+                        }
+                    });
+                    _dbContext.SaveChanges();
+
+                }
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+            }            
+
+            return _id;
+        }
+
+
         [HttpDelete]
         [Route("delete/{id}")]
         public bool Delete(int id)
@@ -230,9 +293,9 @@ namespace InventoryControl.Server.Controllers
                     x.IsActive = false; 
                     x.UpdatedDate = DateTime.Now;
 
-                    if (_dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.FromWarehouseId && x.ProductId == x.ProductId && x.IsActive).Any())
+                    if (_dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.FromWarehouseId && y.ProductId == x.ProductId && y.IsActive).Any())
                     {
-                        var _product = _dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.FromWarehouseId && x.ProductId == x.ProductId && x.IsActive).First();
+                        var _product = _dbContext.WarehouseProducts.Where(y => y.WarehouseId == _info.FromWarehouseId && y.ProductId == x.ProductId && y.IsActive).First();
                         _product.Quantity += x.Quantity;
                         _product.UpdatedDate = DateTime.Now;
                     }

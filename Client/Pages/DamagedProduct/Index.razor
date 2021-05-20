@@ -1,0 +1,123 @@
+﻿@page "/DamagedProduct/Index"
+@using InventoryControl.Shared
+@using InventoryControl.Client.Components
+@using InventoryControl.Shared.RequestFeatures
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>Damaged Product Listing</h3>
+
+
+@if (orders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="OnAddNew">Create New Damaged</button>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Damaged Date</th>
+                <th>Warehouse</th>
+                <th>Remark</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var info in orders)
+            {
+                <tr>
+                    <td>@info.Code</td>
+                    <td>@info.DamagedDate</td>
+                    <td>@info.WarehouseName</td>
+                    <td>@info.Remark</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
+}
+
+@code {
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters();
+    private List<DamagedProductHeaderInfo> orders;
+
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/DamagedProduct/Add");
+    }
+
+    void OnDetails(int id)
+    {
+        NavigationManager.NavigateTo($"/DamagedProduct/Details/{id}");
+    }
+
+    async void OnDelete(DamagedProductHeaderInfo info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the Damaged Info '{info.Code}'?"))
+            return;
+
+        var result = await Http.DeleteAsync("api/damagedproduct/delete/" + info.Id);
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        await GetData(_pageParameters);
+
+        StateHasChanged();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
+    }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    orders = await Http.GetFromJsonAsync<List<SaleOrderHeaderInfo>>("api/saleorder/getheaders");
+    //}
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task GetData(PageParameters parameters)
+    {
+        var response = await Http.GetFromJsonAsync<DamagedProductHeaderList>($"api/damagedproduct/getheaders?PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}");
+
+        orders = response.Items;
+        MetaData = response.Meta;
+    }
+
+}

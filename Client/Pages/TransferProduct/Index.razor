@@ -27,26 +27,34 @@ else
                 <th>From Warehouse</th>
                 <th>To Warehouse</th>
                 @*<th>Cost</th>*@
-                <th>Remark</th>
+                <th>Status</th>
+                <th>Received Date</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var info in tansferProducts)
             {
-                <tr>
-                    <td>@info.Code</td>
-                    <td>@info.TransferDate</td>
-                    <td>@info.FromWarehouseName</td>
-                    <td>@info.ToWarehouseName</td>
-                    @*<td>@String.Format("{0:0.00}", info.Cost)</td>*@
-                    <td>@info.Remark</td>
-                    <td>
-                        @*<a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |*@
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>@info.Code</td>
+                <td>@info.TransferDate</td>
+                <td>@info.FromWarehouseName</td>
+                <td>@info.ToWarehouseName</td>
+                @*<td>@String.Format("{0:0.00}", info.Cost)</td>*@
+                <td>@(info.Received ? "Received" : "Pending" )</td>
+                <td>@info.ReceivedDate</td>
+                <td>
+                    @*<a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |*@
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnChangeStatus(info))">ChangeStatus</a> |
+
+                    @if (!info.Received)
+                    {
+                        string _spliter = " | ";
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> @_spliter
+                    }
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Details</a>
+                </td>
+            </tr>
             }
         </tbody>
     </table>
@@ -98,6 +106,21 @@ else
         await GetData(_pageParameters);
 
         StateHasChanged();
+    }
+
+    async void OnChangeStatus(TransferProductHeaderInfo info)
+    {
+        var _status = info.Received ? "Pending" : "Received";
+
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to change the Status to '{_status}' for {info.Code}?"))
+            return;
+
+        info.Received = !info.Received;
+
+        var result = await Http.GetFromJsonAsync<int>($"api/transferproduct/updatestatus/{info.Id}/{info.Received}");
+
+        if (result > 0)
+            await LoadForm();
     }
 
     private async Task SelectedPage(int page)

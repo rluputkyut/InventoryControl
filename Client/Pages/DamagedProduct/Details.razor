@@ -1,0 +1,113 @@
+﻿@page "/DamagedProduct/Details/{id:int}"
+@using InventoryControl.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Damaged Product Details</h3>
+
+@if (headerOrder == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                Code:
+            </dt>
+            <dd>
+                @headerOrder.Code
+            </dd>
+
+            <dt>
+                Damaged Date:
+            </dt>
+            <dd>
+                @headerOrder.DamagedDate
+            </dd>
+
+            <dt>
+                Warehouse:
+            </dt>
+            <dd>
+                @headerOrder.WarehouseName
+            </dd>
+
+            <dt>
+                Remark:
+            </dt>
+            <dd>
+                @headerOrder.Remark
+            </dd>
+
+            <dt>
+                Cost:
+            </dt>
+            <dd>
+                @{ string _cost= String.Format("{0:0.00} {1}", headerOrder.Cost, _currencyCode);}
+                @_cost
+            </dd>
+        </dl>
+
+        <table class="table">
+            <tr>
+                <th>
+                    Product
+                </th>
+                <th>
+                    Quantity
+                </th>
+            </tr>
+
+            @foreach (var item in headerOrder.Items)
+            {
+                <tr>
+                    <td>
+                        @item.ProductName
+                    </td>
+                    <td>
+                        @item.Quantity
+                    </td>
+                </tr>
+            }
+
+        </table>
+
+    </div>
+
+}
+<p>
+    <button type="button" class="btn btn-secondary" @onclick="@OnBack">Back</button>
+</p>
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+    string _currencyCode { get; set; }
+    private DamagedProductHeaderInfo headerOrder;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _currencyCode = string.Empty;
+        headerOrder = new DamagedProductHeaderInfo();
+        headerOrder.Items = new List<DamagedProductItemInfo>();
+
+        if (id > 0)
+        {
+            headerOrder = await Http.GetFromJsonAsync<DamagedProductHeaderInfo>($"api/damagedproduct/getheaderbyid/{id}");
+            headerOrder.Items = await Http.GetFromJsonAsync<List<DamagedProductItemInfo>>($"api/damagedproduct/getitemsbyid/{id}");
+            var _warehouse = await Http.GetFromJsonAsync<WarehouseInfo>($"api/warehouse/getbyid/{headerOrder.WarehouseId}");
+            _currencyCode = _warehouse.CurrencyCode;
+        }
+
+    }
+
+    void OnBack()
+    {
+        NavigationManager.NavigateTo("/DamagedProduct/Index");
+    }
+
+}

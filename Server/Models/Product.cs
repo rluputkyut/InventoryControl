@@ -9,6 +9,7 @@ namespace InventoryControl.Server.Models
     {
         public Product()
         {
+            DamagedProductItems = new HashSet<DamagedProductItem>();
             PreOrderItems = new HashSet<PreOrderItem>();
             PurchaseOrderItems = new HashSet<PurchaseOrderItem>();
             SaleOrderItems = new HashSet<SaleOrderItem>();
@@ -33,6 +34,7 @@ namespace InventoryControl.Server.Models
 
         public virtual Brand Brand { get; set; }
         public virtual ProductType ProductType { get; set; }
+        public virtual ICollection<DamagedProductItem> DamagedProductItems { get; set; }
         public virtual ICollection<PreOrderItem> PreOrderItems { get; set; }
         public virtual ICollection<PurchaseOrderItem> PurchaseOrderItems { get; set; }
         public virtual ICollection<SaleOrderItem> SaleOrderItems { get; set; }

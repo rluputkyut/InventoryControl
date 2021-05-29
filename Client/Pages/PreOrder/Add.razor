@@ -40,7 +40,7 @@ else
         </div>
     </div>
     <div class="col-12 row mt-2">
-        <label for="WarehouseId" class="col-md-2 col-form-label">Customer:</label>
+        <label for="WarehouseId" class="col-md-2 col-form-label">Warehouse:</label>
         <div>
             <Select id="WarehouseId" class="form-control" @onchange="WarehouseSelectionChanged">
                 @if (warehouses != null)
@@ -227,7 +227,7 @@ else
         {
             var item = headerInfo.Items.Where(x => x.Id == itemInfo.Id).First();
             item.ProductId = itemInfo.ProductId;
-            item.ProductName = products.Where(x => x.Id == itemInfo.ProductId).Select(x => x.ProductName).FirstOrDefault();
+            item.ProductName = products.Where(x => x.ProductId == itemInfo.ProductId).Select(x => x.ProductName).FirstOrDefault();
             item.Quantity = itemInfo.Quantity;
             item.ProductPrice = itemInfo.ProductPrice;
         }
@@ -235,7 +235,7 @@ else
         {
             itemInfo.Id = GenerateId();
             itemInfo.HeaderId = id;
-            var _product = products.Where(x => x.Id == itemInfo.ProductId).FirstOrDefault();
+            var _product = products.Where(x => x.ProductId == itemInfo.ProductId).FirstOrDefault();
             itemInfo.ProductName = _product.ProductName;
             itemInfo.ProductPrice = _product.Price;
             headerInfo.Items.Add(itemInfo);

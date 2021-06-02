@@ -90,7 +90,6 @@ namespace InventoryControl.Server.Controllers
                         Id = _info.Id,
                         WarehouseId = _info.WarehouseId,
                         ProductId = _info.ProductId,
-                        ProductCode = _product.Code,
                         ProductName = _product.Name,
                         BrandName = _brand.Name,
                         ProductType = _productType.Name,
@@ -137,7 +136,6 @@ namespace InventoryControl.Server.Controllers
                         Id = _info.Id,
                         WarehouseId = _info.WarehouseId,
                         ProductId = _info.ProductId,
-                        ProductCode = _product.Code,
                         ProductName = _product.Name,
                         Quantity = _info.Quantity,
                         Price = _info.Price

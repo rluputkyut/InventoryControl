@@ -28,13 +28,12 @@ namespace InventoryControl.Server.Controllers
         public List<BrandInfo> Get()
         {
             List<BrandInfo> _brands = new List<BrandInfo>();
-            var _brandList = _dbContext.Brands.Where(x=>x.IsActive).ToList();
+            var _brandList = _dbContext.Brands.Where(x=>x.IsActive).OrderByDescending(x=>x.Id).ToList();
             _brandList.ForEach(x =>
             {
                 BrandInfo _info = new BrandInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name
                 };
                 _brands.Add(_info);
@@ -54,7 +53,6 @@ namespace InventoryControl.Server.Controllers
                 BrandInfo _info = new BrandInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name
                 };
                 _brands.Add(_info);
@@ -73,7 +71,7 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.Brands.Where(x => x.Id == id && x.IsActive).Any())
             {
                 var _info = _dbContext.Brands.Where(x => x.Id == id && x.IsActive).First();
-                _brand = new BrandInfo() { Id = _info.Id, Code = _info.Code, Name = _info.Name };
+                _brand = new BrandInfo() { Id = _info.Id, Name = _info.Name };
             }
 
             return _brand;
@@ -90,9 +88,9 @@ namespace InventoryControl.Server.Controllers
             {
                 _list = _dbContext.Brands.Where(x=> x.IsActive).ToList();
             }
-            else if (_dbContext.Brands.Where(x => x.IsActive && (x.Code.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).Any())
+            else if (_dbContext.Brands.Where(x => x.IsActive && x.Name.ToUpper().Contains(name.ToUpper())).Any())
             {
-                _list = _dbContext.Brands.Where(x => x.IsActive && (x.Code.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).ToList();
+                _list = _dbContext.Brands.Where(x => x.IsActive && x.Name.ToUpper().Contains(name.ToUpper())).OrderByDescending(x => x.Id).ToList();
             }
 
             _list.ForEach(x =>
@@ -100,7 +98,6 @@ namespace InventoryControl.Server.Controllers
                 BrandInfo _info = new BrandInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name
                 };
                 _brands.Add(_info);
@@ -118,7 +115,6 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.Brands.Where(x => x.Id == info.Id && x.IsActive).Any())
             {
                 var _info = _dbContext.Brands.Where(x => x.Id == info.Id && x.IsActive).First();
-                _info.Code = info.Code;
                 _info.Name = info.Name;
                 _info.UpdatedDate = DateTime.Now;
                 _result = _dbContext.SaveChanges() > 0;
@@ -133,9 +129,9 @@ namespace InventoryControl.Server.Controllers
         {
             int _id = 0;
 
-            if (!_dbContext.Brands.Where(x => x.Code == info.Code && x.IsActive).Any())
+            if (!_dbContext.Brands.Where(x => x.Name == info.Name && x.IsActive).Any())
             {
-                var _brand = new Brand() { Code = info.Code, Name = info.Name, IsActive = true, CreatedDate = DateTime.Now };
+                var _brand = new Brand() { Name = info.Name, IsActive = true, CreatedDate = DateTime.Now };
                 _dbContext.Brands.Add(_brand);
                 _dbContext.SaveChanges();
                 _id = _brand.Id;

@@ -20,7 +20,7 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Code</th>
+                @*<th>Code</th>*@
                 <th>Name</th>
                 <th>Currency</th>
                 <th></th>
@@ -30,13 +30,13 @@ else
             @foreach (var info in warehouses)
             {
             <tr>
-                <td>@info.Code</td>
+                @*<td>@info.Code</td>*@
                 <td>@info.Name</td>
                 <td>@info.CurrencyCode</td>
                 <td>
                     <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
                     <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a> |
-                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">Instocks</a>
+                    <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDetails(info.Id))">In Stock</a>
                 </td>
             </tr>
             }

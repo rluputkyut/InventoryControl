@@ -27,13 +27,12 @@ namespace InventoryControl.Server.Controllers
         public List<WarehouseInfo> Get()
         {
             List<WarehouseInfo> _warehouses = new List<WarehouseInfo>();
-            var _list = _dbContext.Warehouses.Where(x => x.IsActive).ToList();
+            var _list = _dbContext.Warehouses.Where(x => x.IsActive).OrderByDescending(x => x.Id).ToList();
             _list.ForEach(x =>
             {
                 WarehouseInfo _info = new WarehouseInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name,
                     CurrencyCode = x.CurrencyCode
                 };
@@ -52,7 +51,7 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.Warehouses.Where(x => x.Id == id && x.IsActive).Any())
             {
                 var _info = _dbContext.Warehouses.Where(x => x.Id == id && x.IsActive).First();
-                _warehouse = new WarehouseInfo() { Id = _info.Id, Code = _info.Code, Name = _info.Name, CurrencyCode = _info.CurrencyCode };
+                _warehouse = new WarehouseInfo() { Id = _info.Id, Name = _info.Name, CurrencyCode = _info.CurrencyCode };
             }
 
             return _warehouse;
@@ -69,9 +68,9 @@ namespace InventoryControl.Server.Controllers
             {
                 _list = _dbContext.Warehouses.Where(x => x.IsActive).ToList();
             }
-            else if (_dbContext.Warehouses.Where(x => x.IsActive && (x.Code.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).Any())
+            else if (_dbContext.Warehouses.Where(x => x.IsActive && x.Name.ToUpper().Contains(name.ToUpper())).Any())
             {
-                _list = _dbContext.Warehouses.Where(x => x.IsActive && (x.Code.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).ToList();
+                _list = _dbContext.Warehouses.Where(x => x.IsActive && x.Name.ToUpper().Contains(name.ToUpper())).OrderByDescending(x => x.Id).ToList();
             }
 
             _list.ForEach(x =>
@@ -79,7 +78,6 @@ namespace InventoryControl.Server.Controllers
                 WarehouseInfo _info = new WarehouseInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name,
                     CurrencyCode = x.CurrencyCode
                 };
@@ -98,7 +96,6 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.Warehouses.Where(x => x.Id == info.Id && x.IsActive).Any())
             {
                 var _info = _dbContext.Warehouses.Where(x => x.Id == info.Id && x.IsActive).First();
-                _info.Code = info.Code;
                 _info.Name = info.Name;
                 _info.CurrencyCode = info.CurrencyCode;
                 _info.UpdatedDate = DateTime.Now;
@@ -114,9 +111,9 @@ namespace InventoryControl.Server.Controllers
         {
             int _id = 0;
 
-            if (!_dbContext.Warehouses.Where(x => x.Code == info.Code && x.IsActive).Any())
+            if (!_dbContext.Warehouses.Where(x => x.Name == info.Name && x.IsActive).Any())
             {
-                var _warehouse = new Warehouse() { Code = info.Code, Name = info.Name, CurrencyCode = info.CurrencyCode, IsActive = true, CreatedDate = DateTime.Now };
+                var _warehouse = new Warehouse() { Name = info.Name, CurrencyCode = info.CurrencyCode, IsActive = true, CreatedDate = DateTime.Now };
                 _dbContext.Warehouses.Add(_warehouse);
                 _dbContext.SaveChanges();
                 _id = _warehouse.Id;

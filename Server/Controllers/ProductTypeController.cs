@@ -28,13 +28,12 @@ namespace InventoryControl.Server.Controllers
         public List<ProductTypeInfo> Get()
         {
             List<ProductTypeInfo> _productTypes = new List<ProductTypeInfo>();
-            var _list = _dbContext.ProductTypes.Where(x => x.IsActive).ToList();
+            var _list = _dbContext.ProductTypes.Where(x => x.IsActive).OrderByDescending(x=>x.Id).ToList();
             _list.ForEach(x =>
             {
                 ProductTypeInfo _info = new ProductTypeInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name
                 };
                 _productTypes.Add(_info);
@@ -48,13 +47,12 @@ namespace InventoryControl.Server.Controllers
         public ProductTypeList GetbyPage([FromQuery] PageParameters parameters)
         {
             List<ProductTypeInfo> _productTypes = new List<ProductTypeInfo>();
-            var _list = _dbContext.ProductTypes.Where(x => x.IsActive).ToList();
+            var _list = _dbContext.ProductTypes.Where(x => x.IsActive).OrderByDescending(x => x.Id).ToList();
             _list.ForEach(x =>
             {
                 ProductTypeInfo _info = new ProductTypeInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name
                 };
                 _productTypes.Add(_info);
@@ -74,7 +72,7 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.ProductTypes.Where(x => x.Id == id && x.IsActive).Any())
             {
                 var _info = _dbContext.ProductTypes.Where(x => x.Id == id && x.IsActive).First();
-                _productType = new ProductTypeInfo() { Id = _info.Id, Code = _info.Code, Name = _info.Name };
+                _productType = new ProductTypeInfo() { Id = _info.Id, Name = _info.Name };
             }
 
             return _productType;
@@ -91,9 +89,9 @@ namespace InventoryControl.Server.Controllers
             {
                 _list = _dbContext.ProductTypes.Where(x => x.IsActive).ToList();
             }
-            else if (_dbContext.ProductTypes.Where(x => x.IsActive && (x.Code.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).Any())
+            else if (_dbContext.ProductTypes.Where(x => x.IsActive && x.Name.ToUpper().Contains(name.ToUpper())).Any())
             {
-                _list = _dbContext.ProductTypes.Where(x => x.IsActive && (x.Code.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).ToList();
+                _list = _dbContext.ProductTypes.Where(x => x.IsActive && x.Name.ToUpper().Contains(name.ToUpper())).OrderByDescending(x => x.Id).ToList();
             }
 
             _list.ForEach(x =>
@@ -101,7 +99,6 @@ namespace InventoryControl.Server.Controllers
                 ProductTypeInfo _info = new ProductTypeInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name
                 };
                 _productTypes.Add(_info);
@@ -119,7 +116,6 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.ProductTypes.Where(x => x.Id == info.Id && x.IsActive).Any())
             {
                 var _info = _dbContext.ProductTypes.Where(x => x.Id == info.Id && x.IsActive).First();
-                _info.Code = info.Code;
                 _info.Name = info.Name;
                 _info.UpdatedDate = DateTime.Now;
                 _result = _dbContext.SaveChanges() > 0;
@@ -134,9 +130,9 @@ namespace InventoryControl.Server.Controllers
         {
             int _id = 0;
 
-            if (!_dbContext.ProductTypes.Where(x => x.Code == info.Code && x.IsActive).Any())
+            if (!_dbContext.ProductTypes.Where(x => x.Name == info.Name && x.IsActive).Any())
             {
-                var _productType = new ProductType() { Code = info.Code, Name = info.Name, IsActive = true, CreatedDate = DateTime.Now };
+                var _productType = new ProductType() { Name = info.Name, IsActive = true, CreatedDate = DateTime.Now };
                 _dbContext.ProductTypes.Add(_productType);
                 _dbContext.SaveChanges();
                 _id = _productType.Id;

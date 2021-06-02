@@ -24,7 +24,7 @@ else
         <table class="table">
             <thead>
                 <tr>
-                    <th>Code</th>
+                    @*<th>Code</th>*@
                     <th>Name</th>
                     <th></th>
                 </tr>
@@ -33,7 +33,7 @@ else
                 @foreach (var info in brands)
                 {
                     <tr>
-                        <td>@info.Code</td>
+                        @*<td>@info.Code</td>*@
                         <td>@info.Name</td>
                         <td>
                             <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |

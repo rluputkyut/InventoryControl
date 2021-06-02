@@ -22,7 +22,7 @@ else
     <table class="table col-lg-12col-md-12 col-sm-12">
         <thead>
             <tr>
-                <th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
+                @*<th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>*@
                 <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
                 <th>Nick Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "nickName"))" /></th>
                 <th>Phone No<input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "phoneNo"))" /></th>
@@ -36,7 +36,7 @@ else
             @foreach (var info in customers)
             {
             <tr>
-                <td>@info.Code</td>
+                @*<td>@info.Code</td>*@
                 <td>@info.Name</td>
                 <td>@info.NickName</td>
                 <td>@info.PhoneNo</td>
@@ -107,9 +107,9 @@ else
     {
         switch (columnTitle)
         {
-            case "code":
-                _code = changeEventArgs.Value.ToString();
-                break;
+            //case "code":
+            //    _code = changeEventArgs.Value.ToString();
+            //    break;
             case "name":
                 _name = changeEventArgs.Value.ToString();
                 break;
@@ -153,7 +153,7 @@ else
 
     async Task GetData(PageParameters parameters)
     {
-        _code = string.IsNullOrEmpty(_code) ? string.Empty : _code;
+        //_code = string.IsNullOrEmpty(_code) ? string.Empty : _code;
         _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
         _nickName = string.IsNullOrEmpty(_nickName) ? string.Empty : _nickName;
         _phoneNo = string.IsNullOrEmpty(_phoneNo) ? string.Empty : _phoneNo;

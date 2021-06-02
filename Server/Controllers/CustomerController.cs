@@ -28,13 +28,12 @@ namespace InventoryControl.Server.Controllers
         public List<CustomerInfo> Get()
         {
             List<CustomerInfo> _customers = new List<CustomerInfo>();
-            var _list = _dbContext.Customers.Where(x => x.IsActive).ToList();
+            var _list = _dbContext.Customers.Where(x => x.IsActive).OrderByDescending(x=>x.Id).ToList();
             _list.ForEach(x =>
             {
                 CustomerInfo _info = new CustomerInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name,
                     NickName = x.NickName,
                     AccountInformation = x.AccountInformation,
@@ -53,13 +52,12 @@ namespace InventoryControl.Server.Controllers
         public CustomerList GetByPage([FromQuery] CustomerListRequest request)
         {
             List<CustomerInfo> _customers = new List<CustomerInfo>();
-            var _list = _dbContext.Customers.Where(x => x.IsActive).ToList();
+            var _list = _dbContext.Customers.Where(x => x.IsActive).OrderByDescending(x=>x.Id).ToList();
             _list.ForEach(x =>
             {
                 CustomerInfo _info = new CustomerInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name,
                     NickName = x.NickName,
                     AccountInformation = x.AccountInformation,
@@ -100,7 +98,6 @@ namespace InventoryControl.Server.Controllers
                 _customer = new CustomerInfo() 
                 { 
                     Id = _info.Id,
-                    Code = _info.Code,
                     Name = _info.Name,
                     NickName = _info.NickName,
                     Address = _info.Address,
@@ -126,7 +123,7 @@ namespace InventoryControl.Server.Controllers
             }
             else if (_dbContext.Customers.Where(x => x.IsActive && (x.NickName.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).Any())
             {
-                _list = _dbContext.Customers.Where(x => x.IsActive && (x.NickName.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).ToList();
+                _list = _dbContext.Customers.Where(x => x.IsActive && (x.NickName.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).OrderByDescending(x=>x.Id).ToList();
             }
 
             _list.ForEach(x =>
@@ -134,7 +131,6 @@ namespace InventoryControl.Server.Controllers
                 CustomerInfo _info = new CustomerInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name,
                     NickName = x.NickName,
                     AccountInformation = x.AccountInformation,
@@ -157,7 +153,6 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.Customers.Where(x => x.Id == info.Id && x.IsActive).Any())
             {
                 var _info = _dbContext.Customers.Where(x => x.Id == info.Id && x.IsActive).First();
-                _info.Code = info.Code;
                 _info.Name = info.Name;
                 _info.NickName = info.NickName;
                 _info.AccountInformation = info.AccountInformation;
@@ -178,7 +173,6 @@ namespace InventoryControl.Server.Controllers
             int _id = 0;
             var _customer = new Customer()
             {
-                Code = info.Code,
                 Name = info.Name,
                 NickName = info.NickName,
                 Address = info.Address,

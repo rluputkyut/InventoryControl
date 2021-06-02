@@ -16,13 +16,13 @@ else
 <EditForm Model="warehouse" OnValidSubmit="Create" class="card card-body bg-light mt-5">
     <DataAnnotationsValidator />
 
-    <div class="col-12 row mt-2">
+    @*<div class="col-12 row mt-2">
         <label for="Code" class="col-md-2 col-form-label">Code:</label>
         <div>
             <InputText id="Code" class="form-control" @bind-Value="warehouse.Code" />
             <ValidationMessage For="@(()=> warehouse.Code)" />
         </div>
-    </div>
+    </div>*@
     <div class="col-12 row mt-2">
         <label for="Name" class="col-md-2 col-form-label">Name:</label>
         <div>

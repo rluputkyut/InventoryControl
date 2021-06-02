@@ -28,14 +28,13 @@ namespace InventoryControl.Server.Controllers
         public List<ProductInfo> Get()
         {
             List<ProductInfo> _products = new List<ProductInfo>();
-            var _productList = _dbContext.Products.Where(x => x.IsActive).ToList();
+            var _productList = _dbContext.Products.Where(x => x.IsActive).OrderByDescending(x=>x.Id).ToList();
                         
             _productList.ForEach(x =>
             {
                 ProductInfo _info = new ProductInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name,
                     Description = x.Description,
                     BrandId = x.BrandId,
@@ -59,14 +58,13 @@ namespace InventoryControl.Server.Controllers
         public ProductList GetByPage([FromQuery] ProductListRequest request)
         {
             List<ProductInfo> _products = new List<ProductInfo>();
-            var _productList = _dbContext.Products.Where(x => x.IsActive).ToList();
+            var _productList = _dbContext.Products.Where(x => x.IsActive).OrderByDescending(x => x.Id).ToList();
 
             _productList.ForEach(x =>
             {
                 ProductInfo _info = new ProductInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name,
                     Description = x.Description,
                     BrandId = x.BrandId,
@@ -108,7 +106,6 @@ namespace InventoryControl.Server.Controllers
                 _product = new ProductInfo() 
                 {
                     Id = _info.Id,
-                    Code = _info.Code,
                     Name = _info.Name,
                     Description = _info.Description,
                     BrandId = _info.BrandId,
@@ -137,9 +134,9 @@ namespace InventoryControl.Server.Controllers
             {
                 _list = _dbContext.Products.Where(x => x.IsActive).ToList();
             }
-            else if (_dbContext.Products.Where(x => x.IsActive && (x.Code.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).Any())
+            else if (_dbContext.Products.Where(x => x.IsActive && x.Name.ToUpper().Contains(name.ToUpper())).Any())
             {
-                _list = _dbContext.Products.Where(x => x.IsActive && (x.Code.ToUpper().Contains(name.ToUpper()) || x.Name.ToUpper().Contains(name.ToUpper()))).ToList();
+                _list = _dbContext.Products.Where(x => x.IsActive && x.Name.ToUpper().Contains(name.ToUpper())).OrderByDescending(x=>x.Id).ToList();
             }
 
             _list.ForEach(x =>
@@ -147,7 +144,6 @@ namespace InventoryControl.Server.Controllers
                 ProductInfo _info = new ProductInfo()
                 {
                     Id = x.Id,
-                    Code = x.Code,
                     Name = x.Name,
                     Description = x.Description,
                     BrandId = x.BrandId,
@@ -175,7 +171,6 @@ namespace InventoryControl.Server.Controllers
             if (_dbContext.Products.Where(x => x.Id == info.Id && x.IsActive).Any())
             {
                 var _info = _dbContext.Products.Where(x => x.Id == info.Id && x.IsActive).First();
-                _info.Code = info.Code;
                 _info.Name = info.Name;
                 _info.Description = info.Description;
                 _info.BrandId = info.BrandId;
@@ -198,11 +193,10 @@ namespace InventoryControl.Server.Controllers
         {
             int _id = 0;
 
-            if (!_dbContext.Products.Where(x => x.Code == info.Code && x.IsActive).Any())
+            if (!_dbContext.Products.Where(x => x.Name == info.Name && x.IsActive).Any())
             {
                 var _product = new Product() 
                 {
-                    Code = info.Code,
                     Name = info.Name,
                     Description = info.Description,
                     BrandId = info.BrandId,

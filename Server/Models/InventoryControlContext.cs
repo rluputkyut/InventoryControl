@@ -50,10 +50,6 @@ namespace InventoryControl.Server.Models
             {
                 entity.ToTable("Brand");
 
-                entity.Property(e => e.Code)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Name)
@@ -70,10 +66,6 @@ namespace InventoryControl.Server.Models
                 entity.Property(e => e.AccountInformation).HasMaxLength(500);
 
                 entity.Property(e => e.Address).HasMaxLength(500);
-
-                entity.Property(e => e.Code)
-                    .IsRequired()
-                    .HasMaxLength(50);
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
@@ -180,10 +172,6 @@ namespace InventoryControl.Server.Models
 
                 entity.Property(e => e.BatchCode).HasMaxLength(50);
 
-                entity.Property(e => e.Code)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.ExpiredDate).HasColumnType("datetime");
@@ -216,10 +204,6 @@ namespace InventoryControl.Server.Models
             modelBuilder.Entity<ProductType>(entity =>
             {
                 entity.ToTable("ProductType");
-
-                entity.Property(e => e.Code)
-                    .IsRequired()
-                    .HasMaxLength(100);
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
@@ -387,10 +371,6 @@ namespace InventoryControl.Server.Models
             modelBuilder.Entity<Warehouse>(entity =>
             {
                 entity.ToTable("Warehouse");
-
-                entity.Property(e => e.Code)
-                    .IsRequired()
-                    .HasMaxLength(50);
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 

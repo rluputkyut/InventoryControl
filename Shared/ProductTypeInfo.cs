@@ -17,7 +17,7 @@ namespace InventoryControl.Shared
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Code is Required!")]
+        //[Required(ErrorMessage = "Code is Required!")]
         public string Code { get; set; }
 
         [Required(ErrorMessage = "Name is Required!")]

@@ -97,7 +97,6 @@ namespace InventoryControl.Server.Controllers
                     HeaderId = x.HeaderId,
                     ProductId = x.ProductId,
                     ProductName = _item.Name,
-                    ProductCode = _item.Code,
                     ProductPrice =x.OrderPrice,
                     Quantity = x.Quantity,
                 };

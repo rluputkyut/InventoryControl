@@ -23,7 +23,7 @@ else
             <thead>
                 <tr>
                     <th></th>
-                    <th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
+                    @*<th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>*@
                     <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
                     <th>Brand <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "brand"))" /></th>
                     <th>ProductType <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "productType"))" /></th>
@@ -45,7 +45,7 @@ else
                     {
                         <td><img class="rounded m-0 h-auto w-auto" src="@string.Format($"data:png;base64,{info.Photo}")" /></td>
                     }
-                    <td>@info.Code</td>
+                    @*<td>@info.Code</td>*@
                     <td>@info.Name</td>
                     <td>@info.BrandName</td>
                     <td>@info.ProductTypeName</td>
@@ -117,9 +117,9 @@ else
     {
         switch (columnTitle)
         {
-            case "code":
-                _code = changeEventArgs.Value.ToString();
-                break;
+            //case "code":
+            //    _code = changeEventArgs.Value.ToString();
+            //    break;
             case "name":
                 _name = changeEventArgs.Value.ToString();
                 break;

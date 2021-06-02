@@ -67,7 +67,7 @@ else
         <table class="table">
             <thead>
                 <tr>
-                    <th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>
+                    @*<th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>*@
                     <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
                     <th>Brand <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "brand"))" /></th>
                     <th>Type <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "type"))" /></th>
@@ -83,7 +83,7 @@ else
                 @foreach (var info in wProducts)
                 {
                 <tr>
-                    <td>@info.ProductCode</td>
+                    @*<td>@info.ProductCode</td>*@
                     <td>@info.ProductName</td>
                     <td>@info.BrandName</td>
                     <td>@info.ProductType</td>
@@ -191,9 +191,9 @@ else
     {
         switch (columnTitle)
         {
-            case "code":
-                _code = changeEventArgs.Value.ToString();
-                break;
+            //case "code":
+            //    _code = changeEventArgs.Value.ToString();
+            //    break;
             case "name":
                 _name = changeEventArgs.Value.ToString();
                 break;
@@ -236,6 +236,8 @@ else
     {
         _code = string.IsNullOrEmpty(_code) ? string.Empty : _code;
         _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
+        _brand = string.IsNullOrEmpty(_brand) ? string.Empty : _brand;
+        _type = string.IsNullOrEmpty(_type) ? string.Empty : _type;
 
         var response = await Http.GetFromJsonAsync<WarehouseProductList>($"api/warehouseproducts/getpgbywarehouseid?WarehouseId={id}&PageNumber={parameters.PageNumber}&PageSize={parameters.PageSize}&Code={_code}&Name={_name}&Brand={_brand}&Type={_type}");
 
